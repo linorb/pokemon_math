@@ -4,6 +4,7 @@
 // אם אין אינטרנט, מוצג עיגול בצבע הסוג עם שם הפוקימון, והמשחק ממשיך לעבוד.
 
 import { SPECIES, TYPES } from './pokedex.js';
+import { renderTrainer } from './trainer.js';
 import { esc } from './util.js';
 
 const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/';
@@ -75,9 +76,12 @@ export function eggSvg(kind = 'egg_common', cls = '') {
   </svg>`;
 }
 
-/** ציור לפריט בחנות / במלאי */
-export function itemArt(item) {
+/** ציור לפריט בחנות / במלאי. בגד מוצג על המאמן עצמו (look = הדמות הנוכחית) */
+export function itemArt(item, look = null) {
   if (!item) return '';
+  if (item.kind === 'wear') {
+    return renderTrainer({ character: look && look.character, equipped: { [item.slot]: item.id } }, 'mini');
+  }
   if (item.id.endsWith('_ball')) return ballSvg(item.id);
   if (item.kind === 'egg') return eggSvg(item.id);
   if (item.icon) return `<span class="gem-art">${item.icon}</span>`;
@@ -119,28 +123,71 @@ export const MONEY = [
   { v: 20, kind: 'note' }, { v: 50, kind: 'note' }, { v: 100, kind: 'note' },
 ];
 
-const NOTE_COLORS = { 20: '#e8716a', 50: '#5fbd8b', 100: '#f0a33a' };
+/** צבעי השטרות (20 אדום, 50 ירוק, 100 כתום, 200 כחול - כמו במציאות) */
+const NOTE_COLORS = { 20: '#d95b6a', 50: '#4fae7a', 100: '#e59a3a', 200: '#4a7fd0' };
 
-/** מטבע או שטר של שקלים */
+/** קוטר המטבעות האמיתיים במ"מ - כדי שהגדלים ביניהם יהיו כמו במציאות */
+const COIN_MM = { 1: 18, 2: 21.6, 5: 24, 10: 23 };
+const PX_PER_MM = 2.7;
+
+const SILVER = '#d3d8de';
+const SILVER_RIM = '#8c96a1';
+const GOLD = '#e2bd4f';
+const GOLD_RIM = '#a8811f';
+
+/** מצולע משוכלל (למטבע 5 שקלים, שיש לו 12 פינות) */
+function polygon(n, r, cx = 50, cy = 50, rot = -90) {
+  return Array.from({ length: n }, (_, i) => {
+    const a = ((rot + (i * 360) / n) * Math.PI) / 180;
+    return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`;
+  }).join(' ');
+}
+
+function coinText(v, color = '#3d4550') {
+  return `<text x="50" y="${v === 10 ? 56 : 58}" text-anchor="middle" font-size="${v === 10 ? 30 : 38}" font-weight="900" fill="${color}" font-family="Arial">${v}</text>
+    <text x="50" y="${v === 10 ? 74 : 80}" text-anchor="middle" font-size="${v === 10 ? 13 : 15}" font-weight="700" fill="${color}" font-family="Arial">₪</text>`;
+}
+
+/**
+ * מטבע או שטר של שקלים, בצבעים ובגדלים של המטבעות האמיתיים:
+ * 1 - עיגול כסוף קטן, 2 - עיגול כסוף גדול יותר, 5 - כסוף עם 12 פינות,
+ * 10 - דו-מתכתי: טבעת כסופה ומרכז זהוב.
+ */
 export function moneySvg(v) {
   if (v >= 20) {
+    const c = NOTE_COLORS[v] || '#8cb';
     return `<svg class="money-svg note" viewBox="0 0 120 64" aria-label="${v} שקלים">
-      <rect x="2" y="2" width="116" height="60" rx="8" fill="${NOTE_COLORS[v] || '#8cb'}" stroke="#333" stroke-width="3"/>
-      <rect x="10" y="10" width="100" height="44" rx="6" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"/>
-      <text x="60" y="44" text-anchor="middle" font-size="30" font-weight="900" fill="#fff" stroke="#333" stroke-width="1">${v}</text>
+      <rect x="2" y="2" width="116" height="60" rx="6" fill="${c}" stroke="#333" stroke-width="2.5"/>
+      <rect x="9" y="9" width="102" height="46" rx="4" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2"/>
+      <circle cx="30" cy="32" r="14" fill="rgba(255,255,255,.3)"/>
+      <text x="80" y="42" text-anchor="middle" font-size="28" font-weight="900" fill="#fff" stroke="rgba(0,0,0,.35)" stroke-width="1" font-family="Arial">${v}</text>
+      <text x="30" y="38" text-anchor="middle" font-size="16" font-weight="700" fill="#fff" font-family="Arial">₪</text>
     </svg>`;
   }
-  const gold = v === 10;
-  return `<svg class="money-svg coin c${v}" viewBox="0 0 64 64" aria-label="${v} שקלים">
-    <circle cx="32" cy="32" r="29" fill="${gold ? '#f2c94c' : '#d6dbe0'}" stroke="#555" stroke-width="3"/>
-    ${gold ? '<circle cx="32" cy="32" r="21" fill="#d6dbe0" stroke="#888" stroke-width="2"/>' : ''}
-    <text x="32" y="42" text-anchor="middle" font-size="${v === 10 ? 24 : 28}" font-weight="900" fill="#333">${v}</text>
+  const size = Math.round((COIN_MM[v] || 20) * PX_PER_MM);
+  const shine = '<ellipse cx="36" cy="30" rx="18" ry="10" fill="#fff" opacity=".35" transform="rotate(-30 36 30)"/>';
+  let body;
+  if (v === 5) {
+    body = `<polygon points="${polygon(12, 47)}" fill="${SILVER}" stroke="${SILVER_RIM}" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="50" cy="50" r="37" fill="none" stroke="${SILVER_RIM}" stroke-width="1.5" opacity=".7"/>`;
+  } else if (v === 10) {
+    body = `<circle cx="50" cy="50" r="47" fill="${SILVER}" stroke="${SILVER_RIM}" stroke-width="3"/>
+      <circle cx="50" cy="50" r="33" fill="${GOLD}" stroke="${GOLD_RIM}" stroke-width="2.5"/>`;
+  } else {
+    body = `<circle cx="50" cy="50" r="47" fill="${SILVER}" stroke="${SILVER_RIM}" stroke-width="3"/>
+      <circle cx="50" cy="50" r="39" fill="none" stroke="${SILVER_RIM}" stroke-width="1.5" opacity=".7"/>`;
+  }
+  return `<svg class="money-svg coin c${v}" viewBox="0 0 100 100" style="--d:${size}px" aria-label="${v} שקלים">
+    ${body}${shine}${coinText(v, v === 10 ? '#5c4510' : '#3d4550')}
   </svg>`;
 }
 
 /* ============================ זוגות (זוגי ואי-זוגי) ============================ */
 
-/** נקודות מסודרות בזוגות: שתי שורות. במספר אי-זוגי נשארת נקודה אחת בלי זוג */
+/**
+ * נקודות מסודרות בזוגות: שתי שורות. במספר אי-זוגי נשארת נקודה אחת בלי זוג.
+ * כל הנקודות באותו צבע - הילד/ה צריך/ה לגלות בעצמו/ה אם נשארה נקודה לבד.
+ */
 export function pairsSvg(n) {
   const cols = Math.ceil(n / 2);
   const W = cols * 26 + 8;
@@ -148,8 +195,7 @@ export function pairsSvg(n) {
   for (let i = 0; i < n; i++) {
     const col = Math.floor(i / 2);
     const row = i % 2;
-    const lonely = n % 2 === 1 && i === n - 1;
-    dots += `<circle cx="${col * 26 + 17}" cy="${row * 26 + 17}" r="10" class="${lonely ? 'lonely' : ''}"/>`;
+    dots += `<circle cx="${col * 26 + 17}" cy="${row * 26 + 17}" r="10"/>`;
   }
   return `<svg class="pairs-svg" viewBox="0 0 ${W} 60" style="max-width:${Math.min(W * 1.6, 520)}px" dir="ltr">${dots}</svg>`;
 }

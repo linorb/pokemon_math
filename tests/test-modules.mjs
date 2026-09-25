@@ -35,7 +35,7 @@ globalThis.document = {
 
 /* ---------- ייבוא כל המודולים ---------- */
 const mods = {};
-for (const name of ['util', 'topics', 'storage', 'progress', 'pokedex', 'pokemon', 'shop', 'art',
+for (const name of ['util', 'topics', 'trainer', 'storage', 'progress', 'pokedex', 'pokemon', 'shop', 'art',
   'questions', 'qui', 'ui', 'battle', 'map', 'lightning', 'main']) {
   try {
     mods[name] = await import(`../js/${name}.js`);
@@ -47,6 +47,7 @@ for (const name of ['util', 'topics', 'storage', 'progress', 'pokedex', 'pokemon
 
 const storage = mods.storage;
 const pk = mods.pokemon;
+const S = (s) => mods.util.stripNiqqud(s);
 const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainRoot, baseSpecies } = mods.pokedex;
 
 /* ---------- פוקידקס ---------- */
@@ -73,7 +74,7 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   const { pokemonImg, spriteUrl, ballSvg, eggSvg, itemArt, baseTenBlocks, moneySvg, pairsSvg, MONEY } = mods.art;
   check('כתובת התמונה מ-PokeAPI', spriteUrl(25) === 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png');
   const img = pokemonImg(25);
-  check('תמונת פוקימון עם שם וחלופה', img.includes('data-name="פיקאצ&#39;ו"') && img.includes('onerror') && img.includes('loading="lazy"'));
+  check('תמונת פוקימון עם שם וחלופה', S(img).includes('data-name="פיקאצ&#39;ו"') && img.includes('onerror') && img.includes('loading="lazy"'));
   check('צללית לפוקימון שלא נתפס', pokemonImg(150, { silhouette: true, unknown: true }).includes('silhouette') && pokemonImg(150, { unknown: true }).includes('data-name="?"'));
   check('ציורי כדורים', ['poke_ball', 'great_ball', 'ultra_ball'].every((b) => ballSvg(b).includes('<svg')));
   check('ציורי ביצים', ['egg_common', 'egg_legend'].every((e) => eggSvg(e).includes('<svg')));
@@ -82,15 +83,20 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
     return (html.match(/bt-h"/g) || []).length === 3 && !html.includes('bt-t"') && (html.match(/bt-u"/g) || []).length === 5;
   })());
   check('ציור לכל מטבע ושטר', MONEY.every((m) => moneySvg(m.v).includes(`>${m.v}<`)));
-  check('זוגות: 7 נקודות, אחת לבד', (pairsSvg(7).match(/<circle/g) || []).length === 7 && (pairsSvg(7).match(/lonely/g) || []).length === 1);
-  check('זוגות: 8 בלי בודדת', !pairsSvg(8).includes('lonely'));
+  check('זוגות: 7 נקודות, כולן באותו צבע', (pairsSvg(7).match(/<circle/g) || []).length === 7 && !/<circle[^>]*class=/.test(pairsSvg(7)));
+  check('מטבעות בגדלים אמיתיים: 1 < 2 < 10 < 5', (() => {
+    const d = (v) => Number(moneySvg(v).match(/--d:(\d+)px/)[1]);
+    return d(1) < d(2) && d(2) < d(10) && d(10) < d(5);
+  })());
+  check('מטבע 5 עם 12 פינות', (moneySvg(5).match(/points="([^"]+)"/)[1].trim().split(' ').length === 12));
+  check('מטבע 10 דו-מתכתי (כסוף וזהוב)', /#d3d8de/i.test(moneySvg(10)) && /#e2bd4f/i.test(moneySvg(10)));
   check('לכל פריט בחנות יש ציור', mods.shop.CATALOG.every((i) => itemArt(i).length > 10));
 }
 
 /* ---------- דרגות ---------- */
 {
   const { RANKS, rankFor, nextRankFor, rankIndexFor } = mods.progress;
-  check('חמש דרגות מאמן', RANKS.length === 5 && rankFor(0).name === 'מאמן מתחיל' && rankFor(99999).name === 'אלוף פוקימון');
+  check('חמש דרגות מאמן', RANKS.length === 5 && S(rankFor(0).name) === 'מאמן מתחיל' && S(rankFor(99999).name) === 'אלוף פוקימון');
   check('אין דרגה אחרי אלוף', nextRankFor(99999) === null);
   check('סדר הדרגות עולה', RANKS.every((r, i) => i === 0 || r.xp > RANKS[i - 1].xp));
   check('חישוב אינדקס דרגה', rankIndexFor(119) === 0 && rankIndexFor(120) === 1);
@@ -116,7 +122,7 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
 
   check('לא מוכן להתפתח ברמה 1', pk.canEvolve(starter.uid) === false);
   const opt = pk.evolutionOptions(starter.uid)[0];
-  check('סיבה ברורה למה עוד לא', opt.method === 'level' && opt.reason.includes('רמה 8'));
+  check('סיבה ברורה למה עוד לא', opt.method === 'level' && S(opt.reason).includes('רמה 8'));
   check('אי אפשר להתפתח לפני הזמן', pk.evolve(starter.uid, 5).ok === false);
 
   const up = pk.addPartnerXp(pk.xpForLevel(8) - 1);
@@ -135,7 +141,7 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   // התפתחות באבן
   const eevee = pk.addPokemon(133);
   check('המלווה לא מתחלף כשמוסיפים פוקימון', pk.partner().uid === starter.uid);
-  check('איווי צריך אבן', pk.canEvolve(eevee.uid) === false && pk.evolutionOptions(eevee.uid).every((o) => o.reason.includes('פוקימרט')));
+  check('איווי צריך אבן', pk.canEvolve(eevee.uid) === false && pk.evolutionOptions(eevee.uid).every((o) => S(o.reason).includes('פוקימרט')));
   storage.update((s) => { s.items.fire_stone = 1; });
   check('עם אבן אש - רק פלריון פתוח', pk.evolutionOptions(eevee.uid).filter((o) => o.ready).map((o) => o.to).join() === '136');
   check('אבן מים חסרה - אי אפשר לואפוריון', pk.evolve(eevee.uid, 134).ok === false);
@@ -209,7 +215,7 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   storage.update((s) => { s.player.coins = 5000; });
   check('אפשר לקנות סופרדור', shop.canBuy('great_ball').ok === true);
   check('אולטרדור נעול למאמן מתחיל', shop.canBuy('ultra_ball').ok === false);
-  check('ביצת אגדה נעולה', shop.canBuy('egg_legend').reason.includes('אלוף'));
+  check('ביצת אגדה נעולה', shop.canBuy('egg_legend').code === 'rank' && S(shop.canBuy('egg_legend').reason).includes('אלוף'));
 
   const r = shop.buy('great_ball');
   check('קנייה מורידה פוקדולרים ומוסיפה למלאי', r.ok && storage.getState().player.coins === 5000 - 30 && shop.countOf('great_ball') === 1);
@@ -223,7 +229,7 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   check('כל הביצים הרגילות בקעו', hatched.length === commons, `${hatched.length}/${commons}`);
   check('ביצים לא בוקעות פוקימון שכבר יש', new Set(hatched).size === hatched.length);
   check('ביצה רגילה בוקעת רק נפוצים', hatched.every((id) => SPECIES[id].rarity === 'common'));
-  check('כשיש את כולם - אי אפשר לקנות עוד ביצה', shop.canBuy('egg_common').ok === false && shop.canBuy('egg_common').reason.includes('כבר יש'));
+  check('כשיש את כולם - אי אפשר לקנות עוד ביצה', shop.canBuy('egg_common').ok === false && shop.canBuy('egg_common').code === 'egg_done');
 
   storage.update((s) => { s.player.xp = 99999; });
   check('באלופים נפתחת ביצת אגדה', shop.canBuy('egg_legend').ok === true);
@@ -240,7 +246,7 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   check('פוקדולרים לא יורדים מתחת לאפס', p.coins() === 0);
 
   const up = p.addXp(130);
-  check('עליית דרגה מדווחת', up.leveledUp === true && up.rank.name === 'מאמן');
+  check('עליית דרגה מדווחת', up.leveledUp === true && S(up.rank.name) === 'מאמן');
 
   check('נושאי ברירת מחדל פתוחים', p.enabledTopics().join() === 'numbers,even_odd,add_sub,missing,insight,word_add', p.enabledTopics().join());
   p.setTopicEnabled('even_odd', false);
@@ -282,7 +288,18 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   check('מיגרציה מתקנת מלווה שלא קיים', m.pokemon.partnerUid === 'a1');
   check('מיגרציה משלימה פריטים חסרים', m.items.great_ball === 2 && m.items.ultra_ball === 0);
   check('מיגרציה מסירה נושאים לא מוכרים', m.settings.enabledTopics.join() === 'numbers');
-  check('מיגרציה משלימה הגדרות', m.settings.autoRead === true && Array.isArray(m.reviewQueue));
+  check('מיגרציה משלימה הגדרות', Array.isArray(m.settings.enabledTopics) && Array.isArray(m.reviewQueue));
+  check('מיגרציה מגרסה 1: נוסף מאמן, וההקראה האוטומטית הוסרה', (() => {
+    const old = storage.migrate({ schemaVersion: 1, player: { name: 'דני' }, pokemon: { owned: [] }, settings: { autoRead: true, readAloud: true } });
+    return old.schemaVersion === 2 && old.trainer.character === 'c1' && Object.values(old.trainer.equipped).every((v) => v === null)
+      && !('autoRead' in old.settings) && !('readAloud' in old.settings);
+  })());
+  check('מיגרציה: בגד שלא נקנה לא נלבש, ודמות לא מוכרת מתוקנת', (() => {
+    const bad = storage.migrate({ schemaVersion: 2, player: {}, pokemon: {},
+      trainer: { character: 'zzz', owned: ['hat_red', 'no_such'], equipped: { hat: 'hat_red', shirt: 'sh_red', shoes: 'hat_red' } } });
+    return bad.trainer.character === 'c1' && bad.trainer.owned.join() === 'hat_red'
+      && bad.trainer.equipped.hat === 'hat_red' && bad.trainer.equipped.shirt === null && bad.trainer.equipped.shoes === null;
+  })());
   check('שמירה ריקה = ברירת מחדל', storage.migrate(null).schemaVersion === storage.CURRENT_SCHEMA_VERSION);
 
   storage.resetAll();
@@ -344,9 +361,56 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   const { GENERATORS } = mods.questions;
   const q = GENERATORS.find((g) => g.type === 'facts20').gen(0);
   const s = speechFor(q);
-  check('הקראת תרגיל בנוסח מדובר', /שווה כמה$/.test(s) && !s.includes('?') && !s.includes('+'), s);
+  check('בתרגיל מוקראת רק ההוראה, בלי המספרים', s === 'פתרו את התרגיל:', s);
   const w = GENERATORS.find((g) => g.type === 'word_collect').gen(0);
-  check('הקראת משימה בלי סוגריים מרובעים', !speechFor(w).includes('[['), speechFor(w));
+  const ws = speechFor(w);
+  check('בשאלה מילולית מוקרא גם הסיפור, בלי ניקוד וסוגריים', !ws.includes('[[') && /\d/.test(ws) && !/[\u0591-\u05C7]/.test(ws), ws);
+  const choice = GENERATORS.find((g) => g.type === 'order_pick').gen(1);
+  check('בשאלת בחירה לא מוקראות האפשרויות', !/\d/.test(speechFor(choice)), speechFor(choice));
+}
+
+/* ---------- המאמן: דמויות, בגדים וארון ---------- */
+{
+  const { CHARACTERS, WEAR, WEAR_SLOTS, renderTrainer, wearById } = mods.trainer;
+  const shop = mods.shop;
+
+  check('8 דמויות לבחירה, בלי כפילויות', CHARACTERS.length === 8 && new Set(CHARACTERS.map((c) => c.id)).size === 8);
+  check('אין מזהי בגדים כפולים', new Set(WEAR.map((w) => w.id)).size === WEAR.length);
+  check('כל בגד במקום מוכר, עם מחיר ושם מנוקד', WEAR.every((w) => WEAR_SLOTS.some((s) => s.id === w.slot)
+    && w.price > 0 && /[֑-ׇ]/.test(w.name)));
+  check('לכל מקום יש לפחות 3 פריטים', WEAR_SLOTS.every((s) => WEAR.filter((w) => w.slot === s.id).length >= 3));
+
+  let drawOk = true;
+  for (const c of CHARACTERS) {
+    const plain = renderTrainer({ character: c.id });
+    if (!plain.startsWith('<svg') || plain.includes(' id=')) drawOk = false;
+    for (const w of WEAR) {
+      const svg = renderTrainer({ character: c.id, equipped: { [w.slot]: w.id } });
+      if (!svg.includes('</svg>') || svg === plain || svg.includes('undefined') || svg.includes('NaN')) drawOk = false;
+    }
+  }
+  check('כל דמות מצוירת עם כל בגד (ובגד משנה את הציור)', drawOk);
+  check('בגד במקום הלא נכון לא מצויר', renderTrainer({ character: 'c1', equipped: { hat: 'sh_red' } }) === renderTrainer({ character: 'c1' }));
+
+  storage.resetAll();
+  check('בהתחלה המאמן בלי בגדים שנקנו', storage.getState().trainer.owned.length === 0);
+  storage.update((s) => { s.player.coins = 1000; });
+  check('בגדים מופיעים בפוקימרט', shop.CATALOG.filter((i) => i.kind === 'wear').length === WEAR.length);
+  const r = shop.buy('hat_red');
+  check('קניית כובע: נקנה ונלבש מיד', r.ok && shop.ownsWear('hat_red') && shop.trainerLook().equipped.hat === 'hat_red');
+  check('פוקדולרים ירדו', storage.getState().player.coins === 1000 - wearById('hat_red').price);
+  check('אי אפשר לקנות בגד פעמיים', shop.canBuy('hat_red').code === 'owned');
+  check('בגד יקר נעול לפי דרגה', shop.canBuy('hat_crown').code === 'rank');
+  shop.equipWear('hat', null);
+  check('אפשר להוריד כובע', shop.trainerLook().equipped.hat === null);
+  shop.equipWear('hat', 'hat_blue');
+  check('אי אפשר ללבוש בגד שלא נקנה', shop.trainerLook().equipped.hat === null);
+  shop.equipWear('shirt', 'hat_red');
+  check('אי אפשר ללבוש כובע במקום חולצה', shop.trainerLook().equipped.shirt === null);
+  shop.setCharacter('c5');
+  check('החלפת דמות', shop.trainerLook().character === 'c5');
+  shop.setCharacter('nope');
+  check('דמות לא מוכרת לא נבחרת', shop.trainerLook().character === 'c5');
 }
 
 /* ---------- מתקפת ברק ---------- */

@@ -1,5 +1,6 @@
 // topics.js - רשימת הנושאים (המכונים) לפי תכנית הלימודים במתמטיקה לכיתה ב'.
 // קובץ נפרד וקטן, כדי שגם storage.js יוכל לדעת מה פתוח כברירת מחדל.
+// השמות מנוקדים, כי הילד/ה קורא/ת אותם במפה.
 
 /** פרקי התכנית של משרד החינוך - לקיבוץ הנושאים במסך ההורים */
 export const SECTIONS = [
@@ -15,26 +16,26 @@ export const SECTIONS = [
  * ready - יש לנושא שאלות במשחק. נושא שעוד לא מוכן מוצג במסך ההורים כ"בקרוב".
  */
 export const TOPICS = {
-  numbers: { id: 'numbers', section: 'A', name: 'מספרים עד 1,000', gym: 'מכון ערך המקום', icon: '🔢', defaultOn: true, ready: true },
-  even_odd: { id: 'even_odd', section: 'A', name: 'זוגי ואי-זוגי', gym: 'מכון הזוגות', icon: '👯', defaultOn: true, ready: true },
-  hebrew_nums: { id: 'hebrew_nums', section: 'A', name: 'מספרים באותיות (א-ל)', gym: 'מכון האותיות', icon: '🔤', defaultOn: false, ready: false },
-  add_sub: { id: 'add_sub', section: 'B', name: 'חיבור וחיסור', gym: 'מכון החיבור', icon: '➕', defaultOn: true, ready: true },
-  missing: { id: 'missing', section: 'B', name: 'המספר החסר', gym: 'מכון החידות', icon: '❓', defaultOn: true, ready: true },
-  insight: { id: 'insight', section: 'B', name: 'אומדן והשוואה', gym: 'מכון התובנה', icon: '🔮', defaultOn: true, ready: true },
-  word_add: { id: 'word_add', section: 'B', name: 'שאלות חיבור וחיסור, כסף ועודף', gym: 'מכון המשימות', icon: '🛍️', defaultOn: true, ready: true },
-  vertical: { id: 'vertical', section: 'B', name: 'חיבור וחיסור במאונך', gym: 'מכון העמודות', icon: '🧱', defaultOn: false, ready: false },
-  mult_div: { id: 'mult_div', section: 'B', name: 'כפל וחילוק', gym: 'מכון הכפל', icon: '✖️', defaultOn: false, ready: false },
-  divisibility: { id: 'divisibility', section: 'B', name: 'קפיצות של 2, 5 ו-10', gym: 'מכון הקפיצות', icon: '🦘', defaultOn: false, ready: false },
-  parens: { id: 'parens', section: 'B', name: 'סוגריים', gym: 'מכון הסוגריים', icon: '🫧', defaultOn: false, ready: false },
-  word_mult: { id: 'word_mult', section: 'B', name: 'שאלות כפל וחילוק', gym: 'מכון החלוקה', icon: '🍬', defaultOn: false, ready: false },
-  numberline: { id: 'numberline', section: 'C', name: 'ישר המספרים', gym: 'מכון הישר', icon: '📏', defaultOn: false, ready: false },
-  fractions: { id: 'fractions', section: 'C', name: 'חצי ורבע', gym: 'מכון הפיצה', icon: '🍕', defaultOn: false, ready: false },
-  data: { id: 'data', section: 'D', name: 'דיאגרמות', gym: 'מכון הנתונים', icon: '📊', defaultOn: false, ready: false },
-  measure: { id: 'measure', section: 'E', name: 'אורך ומשקל', gym: 'מכון המאזניים', icon: '⚖️', defaultOn: false, ready: false },
-  area: { id: 'area', section: 'E', name: 'שטח והיקף', gym: 'מכון המשבצות', icon: '🟩', defaultOn: false, ready: false },
-  time: { id: 'time', section: 'E', name: 'שעון וזמן', gym: 'מכון השעון', icon: '🕒', defaultOn: false, ready: false },
-  solids: { id: 'solids', section: 'E', name: 'גופים וצורות', gym: 'מכון הגופים', icon: '🧊', defaultOn: false, ready: false },
-  symmetry: { id: 'symmetry', section: 'E', name: 'שיקוף והזזה', gym: 'מכון המראה', icon: '🪞', defaultOn: false, ready: false },
+  numbers: { id: 'numbers', section: 'A', name: 'מִסְפָּרִים עַד 1,000', gym: 'מְכוֹן עֵרֶךְ הַמָּקוֹם', icon: '🔢', defaultOn: true, ready: true },
+  even_odd: { id: 'even_odd', section: 'A', name: 'זוּגִי וְאִי-זוּגִי', gym: 'מְכוֹן הַזּוּגוֹת', icon: '👯', defaultOn: true, ready: true },
+  hebrew_nums: { id: 'hebrew_nums', section: 'A', name: 'מִסְפָּרִים בְּאוֹתִיּוֹת (א-ל)', gym: 'מְכוֹן הָאוֹתִיּוֹת', icon: '🔤', defaultOn: false, ready: false },
+  add_sub: { id: 'add_sub', section: 'B', name: 'חִבּוּר וְחִסּוּר', gym: 'מְכוֹן הַחִבּוּר', icon: '➕', defaultOn: true, ready: true },
+  missing: { id: 'missing', section: 'B', name: 'הַמִּסְפָּר הֶחָסֵר', gym: 'מְכוֹן הַחִידוֹת', icon: '❓', defaultOn: true, ready: true },
+  insight: { id: 'insight', section: 'B', name: 'אֻמְדָּן וְהַשְׁוָאָה', gym: 'מְכוֹן הַתּוֹבָנָה', icon: '🔮', defaultOn: true, ready: true },
+  word_add: { id: 'word_add', section: 'B', name: 'שְׁאֵלוֹת חִבּוּר וְחִסּוּר, כֶּסֶף וְעֹדֶף', gym: 'מְכוֹן הַמְּשִׂימוֹת', icon: '🛍️', defaultOn: true, ready: true },
+  vertical: { id: 'vertical', section: 'B', name: 'חִבּוּר וְחִסּוּר בִּמְאֻנָּךְ', gym: 'מְכוֹן הָעַמּוּדוֹת', icon: '🧱', defaultOn: false, ready: false },
+  mult_div: { id: 'mult_div', section: 'B', name: 'כֶּפֶל וְחִלּוּק', gym: 'מְכוֹן הַכֶּפֶל', icon: '✖️', defaultOn: false, ready: false },
+  divisibility: { id: 'divisibility', section: 'B', name: 'קְפִיצוֹת שֶׁל 2, 5 וְ-10', gym: 'מְכוֹן הַקְּפִיצוֹת', icon: '🦘', defaultOn: false, ready: false },
+  parens: { id: 'parens', section: 'B', name: 'סוֹגְרַיִם', gym: 'מְכוֹן הַסּוֹגְרַיִם', icon: '🫧', defaultOn: false, ready: false },
+  word_mult: { id: 'word_mult', section: 'B', name: 'שְׁאֵלוֹת כֶּפֶל וְחִלּוּק', gym: 'מְכוֹן הַחֲלֻקָּה', icon: '🍬', defaultOn: false, ready: false },
+  numberline: { id: 'numberline', section: 'C', name: 'יְשַׁר הַמִּסְפָּרִים', gym: 'מְכוֹן הַיָּשָׁר', icon: '📏', defaultOn: false, ready: false },
+  fractions: { id: 'fractions', section: 'C', name: 'חֵצִי וָרֶבַע', gym: 'מְכוֹן הַפִּיצָה', icon: '🍕', defaultOn: false, ready: false },
+  data: { id: 'data', section: 'D', name: 'דִּיאַגְרָמוֹת', gym: 'מְכוֹן הַנְּתוּנִים', icon: '📊', defaultOn: false, ready: false },
+  measure: { id: 'measure', section: 'E', name: 'אֹרֶךְ וּמִשְׁקָל', gym: 'מְכוֹן הַמֹּאזְנַיִם', icon: '⚖️', defaultOn: false, ready: false },
+  area: { id: 'area', section: 'E', name: 'שֶׁטַח וְהֶקֵּף', gym: 'מְכוֹן הַמִּשְׁבָּצוֹת', icon: '🟩', defaultOn: false, ready: false },
+  time: { id: 'time', section: 'E', name: 'שָׁעוֹן וּזְמַן', gym: 'מְכוֹן הַשָּׁעוֹן', icon: '🕒', defaultOn: false, ready: false },
+  solids: { id: 'solids', section: 'E', name: 'גּוּפִים וְצוּרוֹת', gym: 'מְכוֹן הַגּוּפִים', icon: '🧊', defaultOn: false, ready: false },
+  symmetry: { id: 'symmetry', section: 'E', name: 'שִׁקּוּף וַהֲזָזָה', gym: 'מְכוֹן הַמַּרְאָה', icon: '🪞', defaultOn: false, ready: false },
 };
 
 /** סדר המכונים במפה - לפי סדר התכנית */

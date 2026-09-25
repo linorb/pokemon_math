@@ -12,9 +12,9 @@ import { getState } from './storage.js';
 const GAME_SECONDS = 60;
 
 const MODES = {
-  easy: { name: 'חיבור וחיסור עד 10', topic: 'add_sub' },
-  normal: { name: 'חיבור וחיסור עד 20', topic: 'add_sub' },
-  mult: { name: 'לוח הכפל עד 6×6', topic: 'mult_div' },
+  easy: { name: 'חִבּוּר וְחִסּוּר עַד 10', topic: 'add_sub' },
+  normal: { name: 'חִבּוּר וְחִסּוּר עַד 20', topic: 'add_sub' },
+  mult: { name: 'לוּחַ הַכֶּפֶל עַד 6×6', topic: 'mult_div' },
 };
 
 let game = null;
@@ -52,13 +52,13 @@ function drawIntro() {
   $('#lightning-body').innerHTML = `
     <div class="card lightning-card">
       <div class="lightning-art">${pokemonImg(25, { cls: 'pk-lg bob' })}</div>
-      <div class="lightning-title">⚡ מתקפת ברק</div>
-      <p class="subtitle">${GAME_SECONDS} שניות. כמה תרגילים תספיקו לפתור?</p>
-      <div class="best-row">🏆 שיאים: קל <span class="num">${fmt(lightningBest('easy'))}</span> · רגיל <span class="num">${fmt(lightningBest('normal'))}</span>${multOpen ? ` · כפל <span class="num">${fmt(lightningBest('mult'))}</span>` : ''}</div>
+      <div class="lightning-title">⚡ מִתְקֶפֶת בָּרָק</div>
+      <p class="subtitle">${GAME_SECONDS} שְׁנִיּוֹת. כַּמָּה תַּרְגִּילִים תַּסְפִּיקוּ לִפְתֹּר?</p>
+      <div class="best-row">🏆 שִׂיאִים: קַל <span class="num">${fmt(lightningBest('easy'))}</span> · רָגִיל <span class="num">${fmt(lightningBest('normal'))}</span>${multOpen ? ` · כֶּפֶל <span class="num">${fmt(lightningBest('mult'))}</span>` : ''}</div>
       <button class="btn btn-secondary btn-xl" type="button" data-mode="easy">🐣 ${MODES.easy.name}</button>
       <button class="btn btn-primary btn-xl" type="button" data-mode="normal">⚡ ${MODES.normal.name}</button>
       ${multOpen ? `<button class="btn btn-lightning btn-xl" type="button" data-mode="mult">✖️ ${MODES.mult.name}</button>` : ''}
-      <p class="small-note">כל תשובה נכונה = פוקדולר וניסיון. טעות לא מורידה כלום.</p>
+      <p class="small-note">כָּל תְּשׁוּבָה נְכוֹנָה = פּוֹקָדוֹלָר וְנִסָּיוֹן. טָעוּת לֹא מוֹרִידָה כְּלוּם.</p>
     </div>`;
   $('#lightning-body').querySelectorAll('[data-mode]').forEach((b) => {
     b.onclick = () => start(b.dataset.mode);
@@ -73,7 +73,7 @@ function drawGame(flash = '') {
       <div class="timer-bar"><div class="timer-fill" style="width:${(game.left / GAME_SECONDS) * 100}%"></div></div>
       <div class="chip-box">⏱ <span class="num" id="lightning-sec">${Math.ceil(game.left)}</span></div>
     </div>
-    ${game.combo >= 3 ? `<div class="combo">🔥 רצף של ${fmt(game.combo)}!</div>` : ''}
+    ${game.combo >= 3 ? `<div class="combo">🔥 רֶצֶף שֶׁל ${fmt(game.combo)}!</div>` : ''}
     <div class="card lightning-card ${flash}">
       <div class="expr expr-big" dir="ltr">${fmt(q.a)} ${q.op} ${fmt(q.b)} = ?</div>
       <div class="bolt-choices">
@@ -91,16 +91,16 @@ function drawEnd(isRecord) {
   const xp = game.score * 2;
   $('#lightning-body').innerHTML = `
     <div class="card lightning-card">
-      <div class="lightning-title">${isRecord ? '🏆 שיא חדש!' : '⚡ סוף הסיבוב'}</div>
+      <div class="lightning-title">${isRecord ? '🏆 שִׂיא חָדָשׁ!' : '⚡ סוֹף הַסִּבּוּב'}</div>
       <div class="big-score num">${fmt(game.score)}</div>
-      <p class="subtitle">תרגילים נכונים ב-${GAME_SECONDS} שניות (${MODES[game.mode].name})</p>
+      <p class="subtitle">תַּרְגִּילִים נְכוֹנִים בְּ-${GAME_SECONDS} שְׁנִיּוֹת (${MODES[game.mode].name})</p>
       <ul class="summary-list">
-        <li><span>השיא שלך</span><span class="num">🏆 ${fmt(lightningBest(game.mode))}</span></li>
-        <li><span>פוקדולרים</span><span class="num">₽ +${fmt(coins)}</span></li>
-        <li><span>ניסיון</span><span class="num">⭐ +${fmt(xp)}</span></li>
-        <li><span>הרצף הארוך ביותר</span><span class="num">🔥 ${fmt(game.bestCombo)}</span></li>
+        <li><span>הַשִּׂיא שֶׁלָּכֶם</span><span class="num">🏆 ${fmt(lightningBest(game.mode))}</span></li>
+        <li><span>פּוֹקָדוֹלָרִים</span><span class="num">₽ +${fmt(coins)}</span></li>
+        <li><span>נִסָּיוֹן</span><span class="num">⭐ +${fmt(xp)}</span></li>
+        <li><span>הָרֶצֶף הֲכִי אָרֹךְ</span><span class="num">🔥 ${fmt(game.bestCombo)}</span></li>
       </ul>
-      <button class="btn btn-primary btn-xl" type="button" id="btn-lightning-again">עוד סיבוב!</button>
+      <button class="btn btn-primary btn-xl" type="button" id="btn-lightning-again">עוֹד סִבּוּב!</button>
     </div>`;
   const mode = game.mode;
   $('#btn-lightning-again').onclick = () => start(mode);
@@ -155,8 +155,8 @@ function finish() {
   updateHUD();
 
   drawEnd(isRecord);
-  if (isRecord && game.score > 0) celebrateLevelUp(`שיא חדש: ${fmt(game.score)}!`, '🏆');
-  else if (lvl.leveledUp) celebrateLevelUp(`עלית לדרגת ${lvl.rank.name}!`);
+  if (isRecord && game.score > 0) celebrateLevelUp(`שִׂיא חָדָשׁ: ${fmt(game.score)}!`, '🏆');
+  else if (lvl.leveledUp) celebrateLevelUp(`עֲלִיתֶם לְדַרְגַּת ${lvl.rank.name}!`);
 }
 
 function start(mode = 'normal') {

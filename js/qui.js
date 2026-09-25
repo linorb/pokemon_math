@@ -35,7 +35,7 @@ function instructionLine(q) {
 /** תשובה מספרית מהמקלדת */
 function keypadVerdict(q, ctx) {
   const v = ctx.keypad.value();
-  if (v === null) return { status: 'incomplete', message: 'כתבו תשובה ואז לחצו בדיקה 🙂' };
+  if (v === null) return { status: 'incomplete', message: 'כִּתְבוּ תְּשׁוּבָה, וְאָז לַחֲצוּ עַל בְּדִיקָה 🙂' };
   return v === q.answer ? { status: 'correct' } : { status: 'wrong' };
 }
 
@@ -64,9 +64,9 @@ function placeValueUI(q, ctx) {
       host.innerHTML = `${instructionLine(q)}
         ${baseTenBlocks(q.blocks)}
         <div class="bt-legend">
-          <span><span class="lg lg-h"></span> מאה</span>
-          <span><span class="lg lg-t"></span> עשר</span>
-          <span><span class="lg lg-u"></span> אחד</span>
+          <span><span class="lg lg-h"></span> מֵאָה</span>
+          <span><span class="lg lg-t"></span> עֶשֶׂר</span>
+          <span><span class="lg lg-u"></span> אֶחָד</span>
         </div>`;
     },
     submit() { return keypadVerdict(q, ctx); },
@@ -118,7 +118,7 @@ function choiceUI(q, ctx) {
     usesSubmit: true,
     mount(el) { host = el; draw(); },
     submit() {
-      if (picked < 0) return { status: 'incomplete', message: 'בחרו תשובה 🙂' };
+      if (picked < 0) return { status: 'incomplete', message: 'בַּחֲרוּ תְּשׁוּבָה 🙂' };
       return q.options[picked].correct ? { status: 'correct' } : { status: 'wrong' };
     },
     lock() {
@@ -146,9 +146,9 @@ function moneyUI(q, ctx) {
     host.innerHTML = `${instructionLine(q)}
       <div class="money-tray">${tray}</div>
       <div class="money-pile ${chosen.length ? '' : 'empty'}">
-        ${pile || '<span class="nl-note">לחצו על מטבע או שטר כדי להניח אותו כאן</span>'}
+        ${pile || '<span class="nl-note">לַחֲצוּ עַל מַטְבֵּעַ אוֹ עַל שְׁטָר, כְּדֵי לְהָנִיחַ אוֹתוֹ כָּאן</span>'}
       </div>
-      ${chosen.length && !locked ? '<div class="nl-note">לחיצה על מטבע כאן מחזירה אותו.</div>' : ''}`;
+      ${chosen.length && !locked ? '<div class="nl-note">לְחִיצָה עַל מַטְבֵּעַ כָּאן מַחְזִירָה אוֹתוֹ.</div>' : ''}`;
 
     host.querySelectorAll('[data-add]').forEach((b) => {
       b.onclick = () => { if (!locked && chosen.length < 20) { chosen.push(Number(b.dataset.add)); draw(); } };
@@ -164,9 +164,9 @@ function moneyUI(q, ctx) {
     mount(el) { host = el; draw(); },
     submit() {
       const sum = chosen.reduce((a, b) => a + b, 0);
-      if (!chosen.length) return { status: 'incomplete', message: 'לחצו על מטבעות ושטרות כדי לשלם 🪙' };
-      if (sum < q.target) return { status: 'incomplete', message: 'עוד לא הגעתם לסכום. ספרו שוב והוסיפו 🙂' };
-      if (sum > q.target) return { status: 'wrong', message: `זה יותר מדי - יצא ${sum} שקלים.` };
+      if (!chosen.length) return { status: 'incomplete', message: 'לַחֲצוּ עַל מַטְבְּעוֹת וּשְׁטָרוֹת כְּדֵי לְשַׁלֵּם 🪙' };
+      if (sum < q.target) return { status: 'incomplete', message: 'עוֹד לֹא הִגַּעְתֶּם לַסְּכוּם. סִפְרוּ שׁוּב וְהוֹסִיפוּ 🙂' };
+      if (sum > q.target) return { status: 'wrong', message: `זֶה יוֹתֵר מִדַּי - יָצָא ${sum} שְׁקָלִים.` };
       return { status: 'correct' };
     },
     lock() {
@@ -207,7 +207,7 @@ function numberLineFillUI(q, ctx) {
 
     host.innerHTML = `${instructionLine(q)}
       <div class="nl-track" dir="ltr">${stones}</div>
-      <div class="nl-note">כתבו את המספר של האבן שעליה הפוקדור.</div>`;
+      <div class="nl-note">כִּתְבוּ אֶת הַמִּסְפָּר שֶׁל הָאֶבֶן שֶׁעָלֶיהָ הַפּוֹקָדוֹר.</div>`;
   }
 
   return {
@@ -216,7 +216,7 @@ function numberLineFillUI(q, ctx) {
     mount(el) { host = el; draw(); },
     submit() {
       const v = ctx.keypad.value();
-      if (v === null) return { status: 'incomplete', message: 'כתבו את המספר של האבן המסומנת 🙂' };
+      if (v === null) return { status: 'incomplete', message: 'כִּתְבוּ אֶת הַמִּסְפָּר שֶׁל הָאֶבֶן הַמְּסֻמֶּנֶת 🙂' };
       const idx = blanks[pos];
       if (v !== q.stones[idx].value) return { status: 'wrong' };
 
@@ -225,7 +225,7 @@ function numberLineFillUI(q, ctx) {
       draw();
       if (pos >= blanks.length) return { status: 'correct' };
       ctx.keypad.reset(q.unit);
-      return { status: 'progress', message: 'יופי! עכשיו האבן הבאה ⚡' };
+      return { status: 'progress', message: 'יֹפִי! עַכְשָׁו הָאֶבֶן הַבָּאָה ⚡' };
     },
     lock() {
       blanks.forEach((i) => filled.add(i));
@@ -250,7 +250,7 @@ function numberLineLocateUI(q, ctx) {
       </button>`).join('');
 
     host.innerHTML = `${instructionLine(q)}
-      <div class="nl-target">היכן נמצא <span class="num">${fmt(q.target)}</span>?</div>
+      <div class="nl-target">אֵיפֹה נִמְצָא <span class="num">${fmt(q.target)}</span>?</div>
       <div class="nl-axis" dir="ltr">${ticks}</div>`;
 
     host.querySelectorAll('[data-i]').forEach((b) => {
@@ -263,7 +263,7 @@ function numberLineLocateUI(q, ctx) {
     usesSubmit: true,
     mount(el) { host = el; draw(); },
     submit() {
-      if (chosen < 0) return { status: 'incomplete', message: 'בחרו מקום על הישר 🙂' };
+      if (chosen < 0) return { status: 'incomplete', message: 'בַּחֲרוּ מָקוֹם עַל הַיָּשָׁר 🙂' };
       return chosen === q.correctIndex ? { status: 'correct' } : { status: 'wrong' };
     },
     lock() {
@@ -338,7 +338,7 @@ function fracColorUI(q, ctx) {
     mount(el) { host = el; draw(); },
     submit() {
       const count = filled.filter(Boolean).length;
-      if (count === 0) return { status: 'incomplete', message: 'לחצו על החלקים כדי לצבוע אותם 🎨' };
+      if (count === 0) return { status: 'incomplete', message: 'לַחֲצוּ עַל הַחֲלָקִים כְּדֵי לִצְבֹּעַ אוֹתָם 🎨' };
       return count === q.target ? { status: 'correct' } : { status: 'wrong' };
     },
     lock() {

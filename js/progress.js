@@ -7,11 +7,11 @@ import { todayKey, daysBetweenKeys } from './util.js';
 /* ============================ דרגות המאמן ============================ */
 
 export const RANKS = [
-  { id: 'rookie', name: 'מאמן מתחיל', xp: 0 },
-  { id: 'trainer', name: 'מאמן', xp: 120 },
-  { id: 'veteran', name: 'מאמן מנוסה', xp: 400 },
-  { id: 'master', name: 'מאסטר פוקימון', xp: 900 },
-  { id: 'champion', name: 'אלוף פוקימון', xp: 1800 },
+  { id: 'rookie', name: 'מְאַמֵּן מַתְחִיל', xp: 0 },
+  { id: 'trainer', name: 'מְאַמֵּן', xp: 120 },
+  { id: 'veteran', name: 'מְאַמֵּן מְנֻסֶּה', xp: 400 },
+  { id: 'master', name: 'מָאסְטֶר פּוֹקִימוֹן', xp: 900 },
+  { id: 'champion', name: 'אַלּוּף פּוֹקִימוֹן', xp: 1800 },
 ];
 
 export function rankIndexFor(xp) {

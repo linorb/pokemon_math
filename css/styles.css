@@ -38,6 +38,7 @@ body {
   background-attachment: fixed;
   color: var(--ink);
   font-size: 19px;
+  line-height: 1.55; /* מקום לניקוד מעל ומתחת לאותיות */
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
@@ -334,7 +335,60 @@ body {
 .home-grid { display: flex; flex-direction: column; }
 .home-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .partner-card { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
-.partner-art { min-height: 200px; display: flex; align-items: center; }
+.duo { display: flex; align-items: flex-end; justify-content: center; gap: 4px; width: 100%; }
+.partner-art { min-height: 160px; display: flex; align-items: flex-end; }
+.home-trainer { background: none; border: none; padding: 0; cursor: pointer; }
+.home-trainer:active { transform: scale(.97); }
+
+/* ===== המאמן ===== */
+.trainer-svg { display: block; height: auto; }
+.trainer-svg.home-size { width: 150px; }
+.trainer-svg.big { width: 100%; max-width: 260px; margin: 0 auto; }
+.trainer-svg.mini { width: 58px; }
+
+.char-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.char-row.small { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.char-btn {
+  background: rgba(0, 0, 0, .22);
+  border: 3px solid rgba(255, 255, 255, .15);
+  border-radius: 14px;
+  padding: 4px;
+  cursor: pointer;
+}
+.char-btn .trainer-svg { width: 100%; }
+.char-btn[aria-pressed="true"] { border-color: var(--gold); background: rgba(255, 210, 63, .2); }
+
+.wardrobe-wrap { display: flex; flex-direction: column; gap: 12px; }
+.wardrobe-art { display: flex; justify-content: center; }
+.wardrobe-side, .wardrobe-slots { display: flex; flex-direction: column; gap: 12px; }
+.slot-row {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 2px solid rgba(255, 255, 255, .12);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.slot-title { font-weight: 700; margin-bottom: 8px; }
+.slot-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.slot-opt {
+  font-family: var(--font);
+  width: 104px;
+  border-radius: 14px;
+  border: 3px solid rgba(255, 255, 255, .15);
+  background: rgba(0, 0, 0, .22);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 6px 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.slot-opt[aria-pressed="true"] { border-color: var(--gold); background: rgba(255, 210, 63, .2); }
+.slot-none { font-size: 34px; line-height: 90px; }
+.shop-item.wear .item-art { height: 100px; }
+.shop-item.wear .item-art svg { height: 96px; width: auto; }
 .partner-name { font-size: 24px; font-weight: 900; }
 .partner-xp { width: 100%; max-width: 260px; }
 .lvl-tag { font-size: 16px; font-weight: 500; color: var(--ink-dim); }
@@ -444,7 +498,7 @@ body {
 .question-card { text-align: center; }
 .q-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .q-topic { color: var(--ink-dim); font-size: 15px; text-align: right; }
-.q-body { font-size: 22px; line-height: 1.6; }
+.q-body { font-size: 22px; line-height: 1.9; }
 .q-text { margin-bottom: 8px; font-weight: 500; }
 
 .read-btn {
@@ -587,7 +641,6 @@ body {
 /* ===== זוגות ===== */
 .pairs-svg { width: 100%; height: auto; }
 .pairs-svg circle { fill: var(--gold); stroke: #6b4a00; stroke-width: 2; }
-.pairs-svg circle.lonely { fill: var(--red); stroke: #7a1a14; }
 
 /* ===== קוביות עשרות ויחידות ===== */
 .bt-wrap {
@@ -635,7 +688,8 @@ body {
 .money-btn:active { transform: scale(.92); }
 .money-btn:disabled { cursor: default; }
 .money-svg { display: block; }
-.money-svg.coin { width: 58px; height: 58px; }
+/* קוטר המטבע מגיע מהציור (--d), כדי שהגדלים יהיו כמו במציאות */
+.money-svg.coin { width: var(--d, 58px); height: var(--d, 58px); }
 .money-svg.note { width: 96px; height: 52px; }
 
 .money-pile {
@@ -651,7 +705,7 @@ body {
   background: rgba(0, 0, 0, .2);
 }
 
-.money-pile .money-svg.coin { width: 48px; height: 48px; }
+.money-pile .money-svg.coin { width: calc(var(--d, 58px) * .85); height: calc(var(--d, 58px) * .85); }
 .money-pile .money-svg.note { width: 80px; height: 44px; }
 
 /* ===== ישר המספרים ===== */
@@ -1161,6 +1215,9 @@ button.dex-card { cursor: pointer; }
   body { font-size: 20px; }
   .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
   .partner-card { grid-row: span 2; }
+  .wardrobe-wrap { flex-direction: row; align-items: flex-start; }
+  .wardrobe-art { flex: 0 0 300px; position: sticky; top: 80px; }
+  .wardrobe-side { flex: 1; }
   .summary-buttons, .settings-group { flex-direction: row; }
   .keypad { max-width: 400px; }
 }

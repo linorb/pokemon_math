@@ -133,13 +133,15 @@ export function evolutionOptions(id) {
       return {
         to: e.to, name: target.name, method: 'stone', stone: e.stone, stoneName: stone.name,
         ready: have > 0,
-        reason: have > 0 ? `יש לך ${stone.name}` : `צריך ${stone.name} - אפשר לקנות בפוקימרט`,
+        reason: have > 0 ? `יֵשׁ לָכֶם ${stone.name}` : `צָרִיךְ ${stone.name} - אֶפְשָׁר לִקְנוֹת בַּפּוֹקִימַרְט`,
       };
     }
+    const left = e.level - lvl;
     return {
       to: e.to, name: target.name, method: 'level', level: e.level,
       ready: lvl >= e.level,
-      reason: lvl >= e.level ? 'מוכן להתפתח!' : `מתפתח ברמה ${e.level} (עוד ${e.level - lvl} רמות)`,
+      reason: lvl >= e.level ? 'מוּכָן לְהִתְפַּתֵּחַ!'
+        : `מִתְפַּתֵּחַ בְּרָמָה ${e.level} (${left === 1 ? 'עוֹד רָמָה אַחַת' : `עוֹד ${left} רָמוֹת`})`,
     };
   });
 }
@@ -156,7 +158,7 @@ export function readyToEvolve() {
 /** התפתחות. אבן התפתחות נצרכת. מחזיר { ok, from, to, reason } */
 export function evolve(id, to) {
   const opt = evolutionOptions(id).find((x) => x.to === to);
-  if (!opt) return { ok: false, reason: 'הפוקימון הזה לא מתפתח לכאן.' };
+  if (!opt) return { ok: false, reason: 'הַפּוֹקִימוֹן הַזֶּה לֹא מִתְפַּתֵּחַ לְכָאן.' };
   if (!opt.ready) return { ok: false, reason: opt.reason };
   const from = findOwned(id).species;
   update((s) => {
@@ -171,9 +173,9 @@ export function evolve(id, to) {
 
 /** סוכרייה נדירה: רמה אחת למעלה */
 export function useRareCandy(id) {
-  if (!findOwned(id)) return { ok: false, reason: 'הפוקימון לא נמצא.' };
-  if ((getState().items.rare_candy || 0) < 1) return { ok: false, reason: 'אין לך סוכרייה נדירה.' };
-  if (levelOf(findOwned(id).xp) >= MAX_LEVEL) return { ok: false, reason: 'הפוקימון כבר ברמה הגבוהה ביותר.' };
+  if (!findOwned(id)) return { ok: false, reason: 'הַפּוֹקִימוֹן לֹא נִמְצָא.' };
+  if ((getState().items.rare_candy || 0) < 1) return { ok: false, reason: 'אֵין לָכֶם סֻכָּרִיָּה נְדִירָה.' };
+  if (levelOf(findOwned(id).xp) >= MAX_LEVEL) return { ok: false, reason: 'הַפּוֹקִימוֹן כְּבָר בָּרָמָה הַגְּבוֹהָה בְּיוֹתֵר.' };
   update((s) => { s.items.rare_candy -= 1; });
   const o = findOwned(id);
   // קופצים בדיוק לתחילת הרמה הבאה
@@ -196,9 +198,9 @@ export function pickWild(rankIdx) {
 /* ============================ תפיסה ============================ */
 
 export const BALLS = {
-  poke_ball: { id: 'poke_ball', name: 'פוקדור', bonus: 0 },
-  great_ball: { id: 'great_ball', name: 'סופרדור', bonus: 0.2 },
-  ultra_ball: { id: 'ultra_ball', name: 'אולטרדור', bonus: 1 },
+  poke_ball: { id: 'poke_ball', name: 'פּוֹקָדוֹר', bonus: 0 },
+  great_ball: { id: 'great_ball', name: 'סוּפֶּרְדוֹר', bonus: 0.2 },
+  ultra_ball: { id: 'ultra_ball', name: 'אוּלְטְרָדוֹר', bonus: 1 },
 };
 
 /**
@@ -231,7 +233,7 @@ export function ballCount(ball) {
  */
 export function throwBall(wildId, chance, ball = 'poke_ball', roll = Math.random()) {
   if (ball !== 'poke_ball') {
-    if (ballCount(ball) < 1) return { caught: false, error: 'אין לך כדור כזה.' };
+    if (ballCount(ball) < 1) return { caught: false, error: 'אֵין לָכֶם כַּדּוּר כָּזֶה.' };
     update((s) => { s.items[ball] -= 1; });
   }
   markSeen(wildId);
