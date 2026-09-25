@@ -19,7 +19,7 @@
   <!-- ===== סרגל עליון ===== -->
   <header id="topbar" class="topbar" hidden>
     <button id="btn-back" class="icon-btn" type="button" aria-label="חזרה">→</button>
-    <div class="topbar-title" id="topbar-title">פוקימון חשבון</div>
+    <div class="topbar-title" id="topbar-title">פּוֹקִימוֹן חֶשְׁבּוֹן</div>
     <div class="topbar-stats">
       <div class="stat-chip" title="פוקדולרים">
         <span class="pd-icon">₽</span><span id="hud-coins" class="num">0</span>
@@ -35,21 +35,26 @@
     <!-- ===== פתיחה: יצירת מאמן ===== -->
     <section id="screen-onboarding" class="screen">
       <div class="card welcome-card">
-        <h1 class="title-big">פוקימון חשבון</h1>
-        <p class="subtitle">פותרים תרגילים, תופסים פוקימונים ומפתחים אותם!</p>
+        <h1 class="title-big">פּוֹקִימוֹן חֶשְׁבּוֹן</h1>
+        <p class="subtitle">פּוֹתְרִים תַּרְגִּילִים, תּוֹפְסִים פּוֹקִימוֹנִים וּמְפַתְּחִים אוֹתָם!</p>
 
         <div class="onb-step">
-          <label class="field-label" for="inp-trainer">איך קוראים למאמן או למאמנת?</label>
-          <input id="inp-trainer" class="text-input" type="text" maxlength="14" placeholder="לדוגמה: נועה" autocomplete="off">
+          <label class="field-label" for="inp-trainer">אֵיךְ קוֹרְאִים לָכֶם?</label>
+          <input id="inp-trainer" class="text-input" type="text" maxlength="14" placeholder="לְדֻגְמָה: נוֹעָה" autocomplete="off">
         </div>
 
         <div class="onb-step">
-          <span class="field-label">בחרו את הפוקימון הראשון שלכם</span>
+          <span class="field-label">בַּחֲרוּ אֶת הַמְּאַמֵּן שֶׁלָּכֶם</span>
+          <div id="character-picker" class="char-row"></div>
+        </div>
+
+        <div class="onb-step">
+          <span class="field-label">בַּחֲרוּ אֶת הַפּוֹקִימוֹן הָרִאשׁוֹן שֶׁלָּכֶם</span>
           <div id="starter-picker" class="starter-row"></div>
         </div>
 
         <p id="onb-error" class="error-text" hidden></p>
-        <button id="btn-start" class="btn btn-primary btn-xl" type="button">יוצאים לדרך!</button>
+        <button id="btn-start" class="btn btn-primary btn-xl" type="button">יוֹצְאִים לַדֶּרֶךְ!</button>
       </div>
     </section>
 
@@ -57,7 +62,10 @@
     <section id="screen-home" class="screen" hidden>
       <div class="home-grid">
         <div class="card partner-card">
-          <div id="home-partner" class="partner-art"></div>
+          <div class="duo">
+            <button id="home-trainer" class="home-trainer" type="button" aria-label="המאמן שלי"></button>
+            <div id="home-partner" class="partner-art"></div>
+          </div>
           <div id="home-partner-name" class="partner-name"></div>
           <div id="home-partner-xp" class="partner-xp"></div>
           <button id="btn-home-evolve" class="btn btn-evolve" type="button" hidden></button>
@@ -69,16 +77,19 @@
 
         <div class="home-actions">
           <button id="btn-battle" class="btn btn-primary btn-xl" type="button">
-            <span class="btn-emoji">🌿</span> יוצאים לקרב!
+            <span class="btn-emoji">🌿</span> יוֹצְאִים לִקְרָב!
           </button>
           <button id="btn-lightning" class="btn btn-lightning btn-xl" type="button">
-            <span class="btn-emoji">⚡</span> מתקפת ברק
+            <span class="btn-emoji">⚡</span> מִתְקֶפֶת בָּרָק
           </button>
           <button id="btn-pokedex" class="btn btn-secondary btn-xl" type="button">
-            <span class="btn-emoji">📖</span> פוקידקס - הפוקימונים שלי
+            <span class="btn-emoji">📖</span> פּוֹקִידֶקְס - הַפּוֹקִימוֹנִים שֶׁלִּי
+          </button>
+          <button id="btn-wardrobe" class="btn btn-secondary btn-xl" type="button">
+            <span class="btn-emoji">👕</span> הַמְּאַמֵּן שֶׁלִּי
           </button>
           <button id="btn-shop" class="btn btn-secondary btn-xl" type="button">
-            <span class="btn-emoji">🏪</span> פוקימרט
+            <span class="btn-emoji">🏪</span> פּוֹקִימַרְט
           </button>
           <button id="btn-settings" class="btn btn-ghost hold-btn" type="button">
             <span class="hold-fill" id="hold-fill"></span>
@@ -93,11 +104,27 @@
       </div>
     </section>
 
+    <!-- ===== המאמן שלי ===== -->
+    <section id="screen-wardrobe" class="screen" hidden>
+      <div class="wardrobe-wrap">
+        <div class="card wardrobe-art">
+          <div id="wardrobe-art"></div>
+        </div>
+        <div class="wardrobe-side">
+          <div class="slot-row">
+            <div class="slot-title">בְּחִירַת דְּמוּת</div>
+            <div id="wardrobe-chars" class="char-row small"></div>
+          </div>
+          <div id="wardrobe-slots" class="wardrobe-slots"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== מפת המכונים ===== -->
     <section id="screen-map" class="screen" hidden>
       <div class="map-head">
-        <h2 class="title-mid">מפת המכונים</h2>
-        <p class="subtitle">כל מכון הוא נושא אחר בחשבון. מי ששולט בנושא מקבל את התג שלו 🏅</p>
+        <h2 class="title-mid">מַפַּת הַמְּכוֹנִים</h2>
+        <p class="subtitle">כָּל מָכוֹן הוּא נוֹשֵׂא אַחֵר בְּחֶשְׁבּוֹן. מִי שֶׁמַּצְלִיחַ מְאוֹד בַּנּוֹשֵׂא מְקַבֵּל אֶת הַתָּג שֶׁלּוֹ 🏅</p>
       </div>
       <div id="map-body"></div>
     </section>
@@ -137,9 +164,9 @@
         </div>
         <div id="keypad" class="keypad"></div>
         <div class="answer-buttons">
-          <button id="btn-hint" class="btn btn-hint" type="button">💡 רמז (2 ₽)</button>
-          <button id="btn-submit" class="btn btn-primary" type="button">בדיקה</button>
-          <button id="btn-next" class="btn btn-primary" type="button" hidden>המשך ←</button>
+          <button id="btn-hint" class="btn btn-hint" type="button">💡 רֶמֶז (2 ₽)</button>
+          <button id="btn-submit" class="btn btn-primary" type="button">בְּדִיקָה</button>
+          <button id="btn-next" class="btn btn-primary" type="button" hidden>הַמְשֵׁךְ ←</button>
         </div>
       </div>
     </section>
@@ -152,13 +179,13 @@
     <!-- ===== סיכום ===== -->
     <section id="screen-summary" class="screen" hidden>
       <div class="card summary-card">
-        <h2 id="summary-title" class="title-mid">סיכום הקרב</h2>
+        <h2 id="summary-title" class="title-mid">סִכּוּם הַקְּרָב</h2>
         <div id="summary-art" class="summary-art"></div>
         <ul id="summary-list" class="summary-list"></ul>
         <div id="summary-evolve" class="summary-evolve" hidden></div>
         <div class="summary-buttons">
-          <button id="btn-summary-dex" class="btn btn-secondary btn-xl" type="button">📖 לפוקידקס</button>
-          <button id="btn-summary-home" class="btn btn-primary btn-xl" type="button">🏠 חזרה הביתה</button>
+          <button id="btn-summary-dex" class="btn btn-secondary btn-xl" type="button">📖 לַפּוֹקִידֶקְס</button>
+          <button id="btn-summary-home" class="btn btn-primary btn-xl" type="button">🏠 חֲזָרָה הַבַּיְתָה</button>
         </div>
       </div>
     </section>
@@ -166,7 +193,7 @@
     <!-- ===== פוקימרט ===== -->
     <section id="screen-shop" class="screen" hidden>
       <div class="shop-head">
-        <h2 class="title-mid">פוקימרט</h2>
+        <h2 class="title-mid">פּוֹקִימַרְט</h2>
         <p class="subtitle" id="shop-coins"></p>
       </div>
       <div id="shop-body"></div>
@@ -175,10 +202,10 @@
     <!-- ===== פוקידקס ===== -->
     <section id="screen-pokedex" class="screen" hidden>
       <div id="dex-detail" class="card dex-detail" hidden></div>
-      <h2 class="title-mid">הפוקימונים שלי</h2>
-      <p class="subtitle">לוחצים על פוקימון כדי לבחור אותו כמלווה או לפתח אותו.</p>
+      <h2 class="title-mid">הַפּוֹקִימוֹנִים שֶׁלִּי</h2>
+      <p class="subtitle">לוֹחֲצִים עַל פּוֹקִימוֹן כְּדֵי לִבְחֹר אוֹתוֹ כִּמְלַוֶּה, אוֹ כְּדֵי לְפַתֵּחַ אוֹתוֹ.</p>
       <div id="dex-mine" class="dex-grid"></div>
-      <h2 class="title-mid dex-all-title">הפוקידקס</h2>
+      <h2 class="title-mid dex-all-title">הַפּוֹקִידֶקְס</h2>
       <p class="subtitle" id="dex-count"></p>
       <div id="dex-all" class="dex-grid small"></div>
     </section>
@@ -243,7 +270,7 @@
   <div id="overlay" class="overlay" hidden>
     <div class="overlay-box" role="dialog" aria-modal="true">
       <div id="overlay-body"></div>
-      <button id="overlay-close" class="btn btn-primary btn-xl" type="button" hidden>מעולה!</button>
+      <button id="overlay-close" class="btn btn-primary btn-xl" type="button" hidden>מְעֻלֶּה!</button>
     </div>
   </div>
 

@@ -27,17 +27,17 @@ export function renderMap(onPick) {
           <span class="region-icon">🔒</span>
           <span class="region-name">${esc(t.gym)}</span>
           <span class="region-topic">${esc(t.name)}</span>
-          <span class="region-acc">${t.ready ? 'ייפתח כשתלמדו את זה בכיתה' : 'בקרוב'}</span>
+          <span class="region-acc">${t.ready ? 'יִפָּתַח כְּשֶׁתִּלְמְדוּ אֶת זֶה בַּכִּתָּה' : 'בְּקָרוֹב'}</span>
         </button>`;
     }
     const stars = regionStars(id);
     const a = acc[id];
     const line = a === null || a === undefined
-      ? 'עוד לא ביקרת כאן'
-      : `דיוק: <span class="num">${fmt(a)}%</span>`;
+      ? 'עוֹד לֹא בִּקַּרְתֶּם כָּאן'
+      : `דִּיּוּק: <span class="num">${fmt(a)}%</span>`;
     return `
       <button class="region-card ${hasBadge(id) ? 'mastered' : ''}" type="button" data-topic="${id}">
-        ${hasBadge(id) ? '<span class="badge-mark" title="יש לך את התג!">🏅</span>' : ''}
+        ${hasBadge(id) ? '<span class="badge-mark" title="יש לכם את התג!">🏅</span>' : ''}
         <span class="region-icon">${t.icon}</span>
         <span class="region-name">${esc(t.gym)}</span>
         <span class="region-topic">${esc(t.name)}</span>
@@ -51,19 +51,19 @@ export function renderMap(onPick) {
 
   $('#map-body').innerHTML = `
     <button class="btn btn-primary btn-xl mixed-btn" type="button" data-topic="">
-      <span class="btn-emoji">🌿</span> קרב פראי - כל הנושאים
+      <span class="btn-emoji">🌿</span> קְרָב פְּרָאִי - כָּל הַנּוֹשְׂאִים
     </button>
     <div class="mixed-note">
-      בקרב פראי מגיעות יותר שאלות מהנושאים שבהם קשה יותר${queued === 1 ? ', וגם שאלה אחת לחזרה 🔁' : queued ? `, וגם ${fmt(queued)} שאלות לחזרה 🔁` : ''}.
+      בִּקְרָב פְּרָאִי מַגִּיעוֹת יוֹתֵר שְׁאֵלוֹת מֵהַנּוֹשְׂאִים הַקָּשִׁים${queued === 1 ? ', וְגַם שְׁאֵלָה אַחַת לַחֲזָרָה 🔁' : queued ? `, וְגַם ${fmt(queued)} שְׁאֵלוֹת לַחֲזָרָה 🔁` : ''}.
     </div>
     <div class="region-grid">${openCards}</div>
-    ${lockedCards ? `<h3 class="locked-title">מכונים נעולים</h3><div class="region-grid">${lockedCards}</div>` : ''}`;
+    ${lockedCards ? `<h3 class="locked-title">מְכוֹנִים נְעוּלִים</h3><div class="region-grid">${lockedCards}</div>` : ''}`;
 
   $('#map-body').onclick = (e) => {
     const locked = e.target.closest('[data-locked]');
     if (locked) {
       const t = TOPICS[locked.dataset.locked];
-      toast(t.ready ? `${t.gym} עוד נעול. מבוגר יכול לפתוח אותו במסך ההורים 🔒` : `${t.gym} יגיע בקרוב! 🚧`);
+      toast(t.ready ? `${t.gym} עוֹד נָעוּל. מְבֻגָּר יָכוֹל לִפְתֹּחַ אוֹתוֹ בְּמָסָךְ הַהוֹרִים 🔒` : `${t.gym} יַגִּיעַ בְּקָרוֹב! 🚧`);
       return;
     }
     const btn = e.target.closest('[data-topic]');

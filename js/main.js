@@ -5,18 +5,25 @@ import {
 } from './storage.js';
 import {
   $, showScreen, backTarget, getCurrentScreen, updateHUD, toast, modal, renderHome,
-  renderShop, renderPokedex, renderStarterPicker, refreshStorageWarning, answerInput,
-  renderParentStats, stopSpeaking,
+  renderShop, renderPokedex, renderStarterPicker, renderCharacterPicker, renderWardrobe,
+  refreshStorageWarning, answerInput, renderParentStats, stopSpeaking,
 } from './ui.js';
 import { startBattle, bindBattleButtons, isBattleActive, abandonBattle } from './battle.js';
 import { renderMap } from './map.js';
 import { openLightning, stopLightning } from './lightning.js';
 import { addPokemon, nameOf } from './pokemon.js';
 import { STARTERS } from './pokedex.js';
+import { CHARACTERS } from './trainer.js';
 
 /* ============================ יצירת מאמן ============================ */
 
 let onbStarter = null;
+let onbChar = CHARACTERS[0].id;
+
+function pickChar(id) {
+  onbChar = id;
+  renderCharacterPicker(onbChar, pickChar);
+}
 
 function pickStarter(id) {
   onbStarter = id;
@@ -24,30 +31,32 @@ function pickStarter(id) {
 }
 
 function initOnboarding() {
+  renderCharacterPicker(onbChar, pickChar);
   renderStarterPicker(onbStarter, pickStarter);
 
   $('#btn-start').addEventListener('click', () => {
     const name = $('#inp-trainer').value.trim();
     const err = $('#onb-error');
     if (!name) {
-      err.textContent = 'צריך לכתוב שם למאמן 🙂';
+      err.textContent = 'צָרִיךְ לִכְתֹּב שֵׁם 🙂';
       err.hidden = false;
       $('#inp-trainer').focus();
       return;
     }
     if (!STARTERS.includes(onbStarter)) {
-      err.textContent = 'בחרו את הפוקימון הראשון שלכם ⚡';
+      err.textContent = 'בַּחֲרוּ אֶת הַפּוֹקִימוֹן הָרִאשׁוֹן שֶׁלָּכֶם ⚡';
       err.hidden = false;
       return;
     }
     err.hidden = true;
     update((s) => {
       s.player.name = name;
+      s.trainer.character = onbChar;
       s.player.coins = 30; // מתנת פתיחה - מספיק לסופרדור ראשון
     });
     addPokemon(onbStarter, { partner: true });
     goHome();
-    toast(`ברוך הבא, ${name}! ${nameOf(onbStarter)} מוכן לצאת לדרך ⚡`);
+    toast(`בְּרוּכִים הַבָּאִים, ${name}! ${nameOf(onbStarter)} מוּכָן לָצֵאת לַדֶּרֶךְ ⚡`);
   });
 }
 
@@ -61,6 +70,11 @@ function goHome() {
 function openPokedex(uid = null) {
   renderPokedex(uid);
   showScreen('pokedex');
+}
+
+function openWardrobe() {
+  renderWardrobe();
+  showScreen('wardrobe');
 }
 
 function openShop() {
@@ -129,10 +143,10 @@ function initNav() {
     // יציאה מקרב באמצע - שואלים קודם
     if (getCurrentScreen() === 'battle' && isBattleActive()) {
       const ok = await modal({
-        title: 'לצאת מהקרב?',
-        body: 'התשובות שכבר עניתם עליהן נשמרו, והפוקדולרים נשארים. אבל הפוקימון הבר יברח.',
-        okText: 'יציאה מהקרב',
-        cancelText: 'ממשיכים בקרב',
+        title: 'לָצֵאת מֵהַקְּרָב?',
+        body: 'הַתְּשׁוּבוֹת שֶׁכְּבָר עֲנִיתֶם עֲלֵיהֶן נִשְׁמְרוּ, וְהַפּוֹקָדוֹלָרִים נִשְׁאָרִים. אֲבָל הַפּוֹקִימוֹן הַבָּר יִבְרַח.',
+        okText: 'יְצִיאָה מֵהַקְּרָב',
+        cancelText: 'מַמְשִׁיכִים בַּקְּרָב',
       });
       if (!ok) return;
       abandonBattle();
@@ -151,6 +165,8 @@ function initNav() {
   $('#btn-lightning').addEventListener('click', () => openLightning());
   $('#btn-shop').addEventListener('click', openShop);
   $('#btn-pokedex').addEventListener('click', () => openPokedex());
+  $('#btn-wardrobe').addEventListener('click', openWardrobe);
+  $('#home-trainer').addEventListener('click', openWardrobe);
 
   initParentGate();
 
@@ -272,8 +288,11 @@ function boot() {
   refreshStorageWarning();
   updateHUD();
 
-  // בחלק מהדפדפנים רשימת הקולות להקראה נטענת רק אחרי הקריאה הראשונה
-  if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+  // בחלק מהדפדפנים רשימת הקולות להקראה נטענת רק אחרי הקריאה הראשונה, ומגיעה באירוע voiceschanged
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener?.('voiceschanged', () => window.speechSynthesis.getVoices());
+  }
 
   if (hasProfile()) {
     goHome();

@@ -1,9 +1,10 @@
 // storage.js - שמירת התקדמות ב-localStorage, כולל גרסאות, מיגרציה וגיבוי
 
 import { DEFAULT_TOPICS, TOPICS } from './topics.js';
+import { CHARACTERS, EMPTY_WEAR, wearById } from './trainer.js';
 
 const STORAGE_KEY = 'pokemonMath.save.v1';
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 /** האם ה-localStorage זמין בפועל (יכול להיחסם במצב פרטי / הגדרות דפדפן) */
 let storageAvailable = detectStorage();
@@ -33,6 +34,11 @@ export function defaultSave() {
       name: '',
       coins: 0,             // פוקדולרים
       xp: 0,                // ניסיון המאמן
+    },
+    trainer: {
+      character: CHARACTERS[0].id,  // הדמות שנבחרה
+      equipped: { ...EMPTY_WEAR },  // מה המאמן לובש עכשיו
+      owned: [],                    // בגדים ואביזרים שנקנו
     },
     pokemon: {
       owned: [],            // [{ uid, species, xp, caughtAt }]
@@ -67,8 +73,6 @@ export function defaultSave() {
       lightningBestMult: 0,
     },
     settings: {
-      readAloud: true,      // כפתור הקראה
-      autoRead: true,       // הקראה אוטומטית של כל שאלה
       enabledTopics: DEFAULT_TOPICS.slice(),
     },
   };
@@ -105,8 +109,16 @@ export function migrate(raw) {
     v = 1;
   }
 
-  // דוגמה לשלב עתידי:
-  // if (v < 2) { data.someNewField = ...; data.schemaVersion = 2; v = 2; }
+  if (v < 2) {
+    // גרסה 2: דמות מאמן ובגדים. ההקראה כבר לא אוטומטית.
+    if (data.settings && typeof data.settings === 'object') {
+      data.settings = { ...data.settings };
+      delete data.settings.autoRead;
+      delete data.settings.readAloud;
+    }
+    data.schemaVersion = 2;
+    v = 2;
+  }
 
   data.schemaVersion = CURRENT_SCHEMA_VERSION;
   data = mergeDefaults(data, defaultSave());
@@ -127,6 +139,16 @@ export function migrate(raw) {
 
   for (const k of Object.keys(data.items)) {
     data.items[k] = Math.max(0, Math.floor(Number(data.items[k]) || 0));
+  }
+
+  const tr = data.trainer;
+  if (!CHARACTERS.some((c) => c.id === tr.character)) tr.character = CHARACTERS[0].id;
+  if (!Array.isArray(tr.owned)) tr.owned = [];
+  tr.owned = tr.owned.filter((id) => wearById(id));
+  for (const slot of Object.keys(EMPTY_WEAR)) {
+    const id = tr.equipped[slot];
+    const w = id && wearById(id);
+    if (!w || w.slot !== slot || !tr.owned.includes(id)) tr.equipped[slot] = null;
   }
 
   if (!Array.isArray(data.reviewQueue)) data.reviewQueue = [];

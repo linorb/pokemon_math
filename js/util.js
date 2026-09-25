@@ -101,11 +101,19 @@ export function wrapMath(escapedText) {
 }
 
 /**
+ * הסרת ניקוד וטעמים. משמש להקראה (מנועי הקראה מתבלבלים מניקוד)
+ * ולבדיקות אוטומטיות שמשוות טקסט.
+ */
+export function stripNiqqud(text) {
+  return String(text ?? '').replace(/[֑-ׇ]/g, '');
+}
+
+/**
  * הפיכת תרגיל לנוסח מדובר עבור ההקראה: "23 + 4 = ?" -> "23 ועוד 4 שווה כמה".
  * בלי זה מנוע ההקראה אומר "פלוס" או מדלג על הסימנים.
  */
 export function speakMath(text) {
-  return String(text ?? '')
+  return stripNiqqud(String(text ?? ''))
     .replace(/\[\[|\]\]/g, '')
     .replace(/[⁦-⁩]/g, '')
     .replace(/ק"ג/g, 'קילוגרם')

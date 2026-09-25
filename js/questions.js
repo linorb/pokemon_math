@@ -1,6 +1,7 @@
 // questions.js - מנוע השאלות לכיתה ב': כל סוג שאלה הוא גנרטור שמייצר מספרים חדשים בכל פעם.
 // כל שאלה מחזירה: נוסח, תשובה נכונה, רמז, ופתרון מלא בשלבים.
 // הנושאים והדוגמאות לקוחים מתכנית הלימודים במתמטיקה של משרד החינוך לכיתה ב'.
+// כל טקסט שהילד/ה קורא/ת מנוקד. פונים לילד/ה בלשון רבים (פִּתְרוּ, לַחֲצוּ), כדי שהניקוד יתאים לכולם.
 
 import { ri, pick, shuffle, weightedPick, fmt } from './util.js';
 import { TOPICS, REGION_ORDER } from './topics.js';
@@ -18,7 +19,7 @@ function Q(o) {
     qid: `q${seq}`,
     ui: 'numeric',
     unit: '',
-    instruction: 'פתרו את התרגיל:',
+    instruction: 'פִּתְרוּ אֶת הַתַּרְגִּיל:',
     expr: '',
     story: '',
     source: 'generated',
@@ -41,9 +42,9 @@ function choiceOptions(correct, wrongs, ltr = false) {
 }
 
 const PEOPLE = [
-  { n: 'נועה', g: 'f' }, { n: 'איתי', g: 'm' }, { n: 'מאיה', g: 'f' }, { n: 'יונתן', g: 'm' },
-  { n: 'תמר', g: 'f' }, { n: 'אורי', g: 'm' }, { n: 'שירה', g: 'f' }, { n: 'דניאל', g: 'm' },
-  { n: 'רוני', g: 'f' }, { n: 'עומר', g: 'm' },
+  { n: 'נוֹעָה', g: 'f' }, { n: 'אִיתַי', g: 'm' }, { n: 'מַאיָה', g: 'f' }, { n: 'יוֹנָתָן', g: 'm' },
+  { n: 'תָּמָר', g: 'f' }, { n: 'אוּרִי', g: 'm' }, { n: 'שִׁירָה', g: 'f' }, { n: 'דָּנִיֵּאל', g: 'm' },
+  { n: 'רוֹנִי', g: 'f' }, { n: 'עוֹמֶר', g: 'm' },
 ];
 
 function twoPeople() {
@@ -51,16 +52,10 @@ function twoPeople() {
   return [a, b];
 }
 
-/** בחירת מילה לפי מין: g(p, 'קנה', 'קנתה') */
+/** בחירת מילה לפי מין: g(p, 'קָנָה', 'קָנְתָה') */
 const g = (p, m, f) => (p.g === 'f' ? f : m);
 
-const THINGS = [
-  { name: 'קלפי פוקימון', one: 'קלף' },
-  { name: 'מדבקות', one: 'מדבקה' },
-  { name: 'גולות', one: 'גולה' },
-  { name: 'סוכריות', one: 'סוכרייה' },
-  { name: 'פוקדורים', one: 'פוקדור' },
-];
+const THINGS = ['קְלָפֵי פּוֹקִימוֹן', 'מַדְבֵּקוֹת', 'גֻּלּוֹת', 'סֻכָּרִיּוֹת', 'פּוֹקָדוֹרִים'];
 
 /**
  * בידוד משמאל לימין בתוך משפט עברי (LRI ... PDI).
@@ -84,27 +79,27 @@ function genPvRead(level = 0) {
   }
   const ans = h * 100 + t * 10 + u;
   const steps = [];
-  if (h) steps.push(`${fmt(h)} לוחות של מאה = ${fmt(h * 100)}.`);
-  steps.push(t ? `${fmt(t)} מוטות של עשר = ${fmt(t * 10)}.` : 'אין מוטות של עשר, ולכן ספרת העשרות היא 0.');
-  steps.push(u ? `${fmt(u)} קוביות בודדות = ${fmt(u)}.` : 'אין קוביות בודדות, ולכן ספרת היחידות היא 0.');
-  steps.push(`ביחד: ${fmt(ans)}.`);
+  if (h) steps.push(`${fmt(h)} לוּחוֹת שֶׁל מֵאָה = ${fmt(h * 100)}.`);
+  steps.push(t ? `${fmt(t)} מוֹטוֹת שֶׁל עֶשֶׂר = ${fmt(t * 10)}.` : 'אֵין מוֹטוֹת שֶׁל עֶשֶׂר, וְלָכֵן סִפְרַת הָעֲשָׂרוֹת הִיא 0.');
+  steps.push(u ? `${fmt(u)} קֻבִּיּוֹת בּוֹדְדוֹת = ${fmt(u)}.` : 'אֵין קֻבִּיּוֹת בּוֹדְדוֹת, וְלָכֵן סִפְרַת הַיְּחִידוֹת הִיא 0.');
+  steps.push(`בְּיַחַד: ${fmt(ans)}.`);
   return Q({
     type: 'pv_read',
     topic: 'numbers',
     ui: 'place_value',
     blocks: { h, t, u },
-    instruction: 'כמה קוביות יש כאן? כתבו את המספר:',
+    instruction: 'כַּמָּה קֻבִּיּוֹת יֵשׁ כָּאן? כִּתְבוּ אֶת הַמִּסְפָּר:',
     answer: ans,
-    hint: 'כל לוח גדול הוא 100, כל מוט הוא 10, וכל קובייה קטנה היא 1. סופרים קודם את הגדולים.',
+    hint: 'כָּל לוּחַ גָּדוֹל הוּא 100, כָּל מוֹט הוּא 10, וְכָל קֻבִּיָּה קְטַנָּה הִיא 1. סוֹפְרִים קֹדֶם אֶת הַגְּדוֹלִים.',
     steps,
   });
 }
 
 /* --- ספרת העשרות / היחידות / המאות, וערך הספרה --- */
 const PLACES = [
-  { key: 'u', name: 'היחידות', value: 1 },
-  { key: 't', name: 'העשרות', value: 10 },
-  { key: 'h', name: 'המאות', value: 100 },
+  { key: 'u', name: 'הַיְּחִידוֹת', value: 1 },
+  { key: 't', name: 'הָעֲשָׂרוֹת', value: 10 },
+  { key: 'h', name: 'הַמֵּאוֹת', value: 100 },
 ];
 
 function genPvDigit(level = 0) {
@@ -117,13 +112,13 @@ function genPvDigit(level = 0) {
     return Q({
       type: 'pv_digit',
       topic: 'numbers',
-      instruction: `מה הערך של הספרה ${d} במספר ${fmt(n)}?`,
+      instruction: `מָה הָעֵרֶךְ שֶׁל הַסִּפְרָה ${d} בַּמִּסְפָּר ${fmt(n)}?`,
       expr: fmt(n),
       answer: d * place.value,
-      hint: 'בודקים באיזה מקום הספרה נמצאת: מאות, עשרות או יחידות.',
+      hint: 'בּוֹדְקִים בְּאֵיזֶה מָקוֹם הַסִּפְרָה נִמְצֵאת: מֵאוֹת, עֲשָׂרוֹת אוֹ יְחִידוֹת.',
       steps: [
         `${fmt(n)} = ${fmt(a * 100)} + ${fmt(b * 10)} + ${fmt(c)}.`,
-        `הספרה ${d} נמצאת במקום של ${place.name}, ולכן הערך שלה הוא ${fmt(d * place.value)}.`,
+        `הַסִּפְרָה ${d} נִמְצֵאת בַּמָּקוֹם שֶׁל ${place.name}, וְלָכֵן הָעֵרֶךְ שֶׁלָּהּ הוּא ${fmt(d * place.value)}.`,
       ],
     });
   }
@@ -134,19 +129,19 @@ function genPvDigit(level = 0) {
   const d = digitsOf(n);
   const ans = d[place.key];
   const parts = level === 0
-    ? `${fmt(n)} = ${fmt(d.t)} עשרות ו-${fmt(d.u)} יחידות.`
-    : `${fmt(n)} = ${fmt(d.h)} מאות, ${fmt(d.t)} עשרות ו-${fmt(d.u)} יחידות.`;
-  const steps = [parts, `ספרת ${place.name} היא ${fmt(ans)}.`];
-  if (ans === 0) steps.push('האפס שומר את המקום: הוא אומר שאין כאן בודדים מהסוג הזה.');
+    ? `${fmt(n)} = ${fmt(d.t)} עֲשָׂרוֹת וְ-${fmt(d.u)} יְחִידוֹת.`
+    : `${fmt(n)} = ${fmt(d.h)} מֵאוֹת, ${fmt(d.t)} עֲשָׂרוֹת וְ-${fmt(d.u)} יְחִידוֹת.`;
+  const steps = [parts, `סִפְרַת ${place.name} הִיא ${fmt(ans)}.`];
+  if (ans === 0) steps.push('הָאֶפֶס שׁוֹמֵר עַל הַמָּקוֹם: הוּא אוֹמֵר שֶׁאֵין כָּאן בּוֹדְדִים מֵהַסּוּג הַזֶּה.');
   return Q({
     type: 'pv_digit',
     topic: 'numbers',
-    instruction: `מה ספרת ${place.name} במספר?`,
+    instruction: `מָה סִפְרַת ${place.name} בַּמִּסְפָּר?`,
     expr: fmt(n),
     answer: ans,
     hint: level === 0
-      ? 'במספר דו-ספרתי: הספרה השמאלית היא העשרות והימנית היא היחידות.'
-      : 'במספר תלת-ספרתי: הספרה השמאלית היא המאות, האמצעית היא העשרות והימנית היא היחידות.',
+      ? 'בְּמִסְפָּר דּוּ-סִפְרָתִי: הַסִּפְרָה הַשְּׂמָאלִית הִיא הָעֲשָׂרוֹת, וְהַיְּמָנִית הִיא הַיְּחִידוֹת.'
+      : 'בְּמִסְפָּר תְּלַת-סִפְרָתִי: הַסִּפְרָה הַשְּׂמָאלִית הִיא הַמֵּאוֹת, הָאֶמְצָעִית הִיא הָעֲשָׂרוֹת, וְהַיְּמָנִית הִיא הַיְּחִידוֹת.',
     steps,
   });
 }
@@ -158,21 +153,21 @@ function genPvCompose(level = 0) {
   if (level === 2 && Math.random() < 0.6) t = 0; // המלכודת של שומר המקום: 3 מאות ו-5 יחידות
   const ans = h * 100 + t * 10 + u;
   const parts = [];
-  if (h) parts.push(`${fmt(h)} מאות`);
-  if (t || level < 2) parts.push(`${fmt(t)} עשרות`);
-  if (u || parts.length < 2) parts.push(`${fmt(u)} יחידות`);
-  const text = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} ו-${parts[parts.length - 1]}` : parts[0];
+  if (h) parts.push(`${fmt(h)} מֵאוֹת`);
+  if (t || level < 2) parts.push(`${fmt(t)} עֲשָׂרוֹת`);
+  if (u || parts.length < 2) parts.push(`${fmt(u)} יְחִידוֹת`);
+  const text = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} וְ-${parts[parts.length - 1]}` : parts[0];
   return Q({
     type: 'pv_compose',
     topic: 'numbers',
-    instruction: 'איזה מספר זה?',
+    instruction: 'אֵיזֶה מִסְפָּר זֶה?',
     expr: text,
     exprRtl: true,
     answer: ans,
-    hint: 'כותבים את ספרת המאות, אחריה את ספרת העשרות ובסוף את ספרת היחידות. אם חסר משהו - כותבים 0 במקומו.',
+    hint: 'כּוֹתְבִים אֶת סִפְרַת הַמֵּאוֹת, אַחֲרֶיהָ אֶת סִפְרַת הָעֲשָׂרוֹת, וּבַסּוֹף אֶת סִפְרַת הַיְּחִידוֹת. אִם חָסֵר מַשֶּׁהוּ - כּוֹתְבִים 0 בִּמְקוֹמוֹ.',
     steps: [
-      h ? `מאות: ${fmt(h)}, עשרות: ${fmt(t)}, יחידות: ${fmt(u)}.` : `עשרות: ${fmt(t)}, יחידות: ${fmt(u)}.`,
-      `המספר הוא ${fmt(ans)}.`,
+      h ? `מֵאוֹת: ${fmt(h)}, עֲשָׂרוֹת: ${fmt(t)}, יְחִידוֹת: ${fmt(u)}.` : `עֲשָׂרוֹת: ${fmt(t)}, יְחִידוֹת: ${fmt(u)}.`,
+      `הַמִּסְפָּר הוּא ${fmt(ans)}.`,
     ],
   });
 }
@@ -203,19 +198,19 @@ function genSequence(level = 0) {
   const blanksCount = level === 0 ? 1 : 2;
   const blankIdx = shuffle([2, 3, 4, 5]).slice(0, blanksCount).sort((a, b) => a - b);
   const stones = values.map((v, i) => ({ value: v, blank: blankIdx.includes(i) }));
-  const verb = step > 0 ? 'מוסיפים' : 'מורידים';
+  const verb = step > 0 ? 'מוֹסִיפִים' : 'מוֹרִידִים';
   return Q({
     type: 'sequence',
     topic: 'numbers',
     ui: 'numberline_fill',
     stones,
-    instruction: 'השלימו את הסדרה:',
+    instruction: 'הַשְׁלִימוּ אֶת הַסִּדְרָה:',
     answer: blankIdx.map((i) => values[i]),
     answerText: blankIdx.map((i) => fmt(values[i])).join(', '),
-    hint: `בדקו כמה משתנה בין שני המספרים הראשונים: ${fmt(values[0])} ואחריו ${fmt(values[1])}.`,
+    hint: `בִּדְקוּ כַּמָּה מִשְׁתַּנֶּה בֵּין שְׁנֵי הַמִּסְפָּרִים הָרִאשׁוֹנִים: ${fmt(values[0])} וְאַחֲרָיו ${fmt(values[1])}.`,
     steps: [
-      `בכל קפיצה ${verb} ${fmt(Math.abs(step))}.`,
-      `הסדרה: ${values.map(fmt).join(', ')}.`,
+      `בְּכָל קְפִיצָה ${verb} ${fmt(Math.abs(step))}.`,
+      `הַסִּדְרָה: ${values.map(fmt).join(', ')}.`,
     ],
   });
 }
@@ -236,19 +231,19 @@ function genNeighbors(level = 0) {
   }
   n = Math.max(d, Math.min(max - d, n));
   const ans = bigger ? n + d : n - d;
-  const word = bigger ? 'הגדול' : 'הקטן';
-  let text = `המספר ${word} ב-${fmt(d)} מ-${fmt(n)}`;
-  if (d === 1 && level === 0 && Math.random() < 0.5) text = bigger ? `המספר העוקב ל-${fmt(n)}` : `המספר הקודם ל-${fmt(n)}`;
+  const word = bigger ? 'הַגָּדוֹל' : 'הַקָּטָן';
+  let text = `הַמִּסְפָּר ${word} בְּ-${fmt(d)} מִ-${fmt(n)}`;
+  if (d === 1 && level === 0 && Math.random() < 0.5) text = bigger ? `הַמִּסְפָּר הָעוֹקֵב לְ-${fmt(n)}` : `הַמִּסְפָּר הַקּוֹדֵם לְ-${fmt(n)}`;
   return Q({
     type: 'neighbors',
     topic: 'numbers',
-    instruction: 'איזה מספר זה?',
+    instruction: 'אֵיזֶה מִסְפָּר זֶה?',
     expr: text,
     exprRtl: true,
     answer: ans,
     hint: d === 1
-      ? (bigger ? 'המספר העוקב בא מיד אחרי המספר בספירה.' : 'המספר הקודם בא מיד לפני המספר בספירה.')
-      : `${bigger ? 'מוסיפים' : 'מורידים'} ${fmt(d)}. שימו לב איזו ספרה משתנה.`,
+      ? (bigger ? 'הַמִּסְפָּר הָעוֹקֵב בָּא מִיָּד אַחֲרֵי הַמִּסְפָּר בַּסְּפִירָה.' : 'הַמִּסְפָּר הַקּוֹדֵם בָּא מִיָּד לִפְנֵי הַמִּסְפָּר בַּסְּפִירָה.')
+      : `${bigger ? 'מוֹסִיפִים' : 'מוֹרִידִים'} ${fmt(d)}. שִׂימוּ לֵב אֵיזוֹ סִפְרָה מִשְׁתַּנָּה.`,
     steps: [`${fmt(n)} ${bigger ? '+' : '-'} ${fmt(d)} = ${fmt(ans)}.`],
   });
 }
@@ -266,11 +261,11 @@ function genDigitChange(level = 1) {
       type: 'digit_change',
       topic: 'numbers',
       ui: 'mission',
-      instruction: 'חידת ספרות:',
-      story: `במספר [[${fmt(n)}]] מחקו את ספרת העשרות. איזה מספר התקבל?`,
+      instruction: 'חִידַת סְפָרוֹת:',
+      story: `בַּמִּסְפָּר [[${fmt(n)}]] מָחֲקוּ אֶת סִפְרַת הָעֲשָׂרוֹת. אֵיזֶה מִסְפָּר הִתְקַבֵּל?`,
       answer: ans,
-      hint: `ספרת העשרות של ${fmt(n)} היא ${t}. מה נשאר כשמוחקים אותה?`,
-      steps: [`ספרת העשרות היא ${t}.`, `בלי ה-${t} נשארות הספרות ${h} ו-${u}, כלומר ${fmt(ans)}.`],
+      hint: `סִפְרַת הָעֲשָׂרוֹת שֶׁל ${fmt(n)} הִיא ${t}. מָה נִשְׁאָר כְּשֶׁמּוֹחֲקִים אוֹתָהּ?`,
+      steps: [`סִפְרַת הָעֲשָׂרוֹת הִיא ${t}.`, `בְּלִי הַ-${t} נִשְׁאָרוֹת הַסְּפָרוֹת ${h} וְ-${u}, כְּלוֹמַר ${fmt(ans)}.`],
     });
   }
   const nt = ri(t + 1, 9);
@@ -280,24 +275,24 @@ function genDigitChange(level = 1) {
       type: 'digit_change',
       topic: 'numbers',
       ui: 'mission',
-      instruction: 'חידת ספרות:',
-      story: `במספר [[${fmt(n)}]] שינו את ספרת העשרות ל-[[${nt}]]. איזה מספר התקבל?`,
+      instruction: 'חִידַת סְפָרוֹת:',
+      story: `בַּמִּסְפָּר [[${fmt(n)}]] שִׁנּוּ אֶת סִפְרַת הָעֲשָׂרוֹת לְ-[[${nt}]]. אֵיזֶה מִסְפָּר הִתְקַבֵּל?`,
       answer: m,
-      hint: 'רק ספרת העשרות מתחלפת. המאות והיחידות נשארות במקום.',
-      steps: [`ספרת העשרות ${t} הופכת ל-${nt}.`, `המספר החדש: ${fmt(m)}.`],
+      hint: 'רַק סִפְרַת הָעֲשָׂרוֹת מִתְחַלֶּפֶת. הַמֵּאוֹת וְהַיְּחִידוֹת נִשְׁאָרוֹת בִּמְקוֹמָן.',
+      steps: [`סִפְרַת הָעֲשָׂרוֹת ${t} הוֹפֶכֶת לְ-${nt}.`, `הַמִּסְפָּר הֶחָדָשׁ: ${fmt(m)}.`],
     });
   }
   return Q({
     type: 'digit_change',
     topic: 'numbers',
     ui: 'mission',
-    instruction: 'חידת ספרות:',
-    story: `במספר [[${fmt(n)}]] שינו את ספרת העשרות ל-[[${nt}]]. בכמה גדל המספר?`,
+    instruction: 'חִידַת סְפָרוֹת:',
+    story: `בַּמִּסְפָּר [[${fmt(n)}]] שִׁנּוּ אֶת סִפְרַת הָעֲשָׂרוֹת לְ-[[${nt}]]. בְּכַמָּה גָּדַל הַמִּסְפָּר?`,
     answer: m - n,
-    hint: `ספרת העשרות גדלה מ-${t} ל-${nt}. כל עשרת שווה 10.`,
+    hint: `סִפְרַת הָעֲשָׂרוֹת גָּדְלָה מִ-${t} לְ-${nt}. כָּל עֲשֶׂרֶת שָׁוָה 10.`,
     steps: [
-      `המספר החדש הוא ${fmt(m)}.`,
-      `ספרת העשרות גדלה ב-${nt - t}, כלומר ב-${nt - t} עשרות.`,
+      `הַמִּסְפָּר הֶחָדָשׁ הוּא ${fmt(m)}.`,
+      `סִפְרַת הָעֲשָׂרוֹת גָּדְלָה בְּ-${nt - t}, כְּלוֹמַר בְּ-${nt - t} עֲשָׂרוֹת.`,
       `${fmt(m)} - ${fmt(n)} = ${fmt(m - n)}.`,
     ],
   });
@@ -324,13 +319,13 @@ function genOrderPick(level = 0) {
     type: 'order_pick',
     topic: 'numbers',
     ui: 'choice',
-    instruction: biggest ? 'איזה מספר הכי גדול?' : 'איזה מספר הכי קטן?',
+    instruction: biggest ? 'אֵיזֶה מִסְפָּר הֲכִי גָּדוֹל?' : 'אֵיזֶה מִסְפָּר הֲכִי קָטָן?',
     options: choiceOptions(fmt(target), nums.filter((x) => x !== target).map(fmt), true),
     answer: fmt(target),
-    hint: 'קודם בודקים כמה ספרות יש בכל מספר. אם יש אותו מספר ספרות - משווים את הספרה השמאלית, אחר כך את הבאה.',
+    hint: 'קֹדֶם בּוֹדְקִים כַּמָּה סְפָרוֹת יֵשׁ בְּכָל מִסְפָּר. אִם יֵשׁ אוֹתוֹ מִסְפַּר סְפָרוֹת - מַשְׁוִים אֶת הַסִּפְרָה הַשְּׂמָאלִית, וְאַחַר כָּךְ אֶת הַבָּאָה.',
     steps: [
-      `מסדרים מהקטן לגדול: ${[...nums].sort((a, b) => a - b).map(fmt).join(', ')}.`,
-      `${biggest ? 'הכי גדול' : 'הכי קטן'}: ${fmt(target)}.`,
+      `מְסַדְּרִים מֵהַקָּטָן לַגָּדוֹל: ${[...nums].sort((a, b) => a - b).map(fmt).join(', ')}.`,
+      `${biggest ? 'הֲכִי גָּדוֹל' : 'הֲכִי קָטָן'}: ${fmt(target)}.`,
     ],
   });
 }
@@ -348,20 +343,20 @@ function genBetween(level = 0) {
     type: 'between',
     topic: 'numbers',
     ui: 'choice',
-    instruction: `איזה מספר נמצא בין ${fmt(lo)} ל-${fmt(hi)}?`,
+    instruction: `אֵיזֶה מִסְפָּר נִמְצָא בֵּין ${fmt(lo)} לְ-${fmt(hi)}?`,
     options: choiceOptions(fmt(inside), wrongs.slice(0, 3).map(fmt), true),
     answer: fmt(inside),
-    hint: `צריך מספר שגדול מ-${fmt(lo)} וגם קטן מ-${fmt(hi)}.`,
+    hint: `צָרִיךְ מִסְפָּר שֶׁגָּדוֹל מִ-${fmt(lo)}, וְגַם קָטָן מִ-${fmt(hi)}.`,
     steps: [
-      `${fmt(inside)} גדול מ-${fmt(lo)}.`,
-      `${fmt(inside)} קטן מ-${fmt(hi)}, ולכן הוא נמצא ביניהם.`,
+      `${fmt(inside)} גָּדוֹל מִ-${fmt(lo)}.`,
+      `${fmt(inside)} קָטָן מִ-${fmt(hi)}, וְלָכֵן הוּא נִמְצָא בֵּינֵיהֶם.`,
     ],
   });
 }
 
 /* ============================ א. זוגי ואי-זוגי ============================ */
 
-const EVEN_WORD = (n) => (isEven(n) ? 'זוגי' : 'אי-זוגי');
+const EVEN_WORD = (n) => (isEven(n) ? 'זוּגִי' : 'אִי-זוּגִי');
 
 function genEoWhich(level = 0) {
   const n = level === 0 ? ri(2, 20) : level === 1 ? ri(21, 99) : ri(100, 999);
@@ -373,13 +368,13 @@ function genEoWhich(level = 0) {
     ui: 'choice',
     noShuffle: true,
     figure: level === 0 ? { kind: 'pairs', n } : null,
-    instruction: level === 0 ? `האם ${n} זוגי או אי-זוגי? (אפשר לספור זוגות)` : `האם ${fmt(n)} זוגי או אי-זוגי?`,
-    options: [opt('זוגי', even), opt('אי-זוגי', !even)],
+    instruction: level === 0 ? `הַאִם ${n} זוּגִי אוֹ אִי-זוּגִי? (אֶפְשָׁר לִסְפֹּר זוּגוֹת)` : `הַאִם ${fmt(n)} זוּגִי אוֹ אִי-זוּגִי?`,
+    options: [opt('זוּגִי', even), opt('אִי-זוּגִי', !even)],
     answer: EVEN_WORD(n),
-    hint: 'מספר זוגי אפשר לסדר בזוגות בלי שיישאר אחד לבד. אפשר גם להסתכל רק על ספרת היחידות: 0, 2, 4, 6, 8 - זוגי.',
+    hint: 'מִסְפָּר זוּגִי אֶפְשָׁר לְסַדֵּר בְּזוּגוֹת, בְּלִי שֶׁיִּשָּׁאֵר אֶחָד לְבַד. אֶפְשָׁר גַּם לְהִסְתַּכֵּל רַק עַל סִפְרַת הַיְּחִידוֹת: 0, 2, 4, 6, 8 - זוּגִי.',
     steps: level === 0
-      ? [`מסדרים ${n} בזוגות: ${even ? 'כולם מסתדרים בזוגות' : 'נשאר אחד לבד'}.`, `לכן ${n} הוא ${EVEN_WORD(n)}.`]
-      : [`ספרת היחידות של ${fmt(n)} היא ${u}.`, `${u} ${isEven(u) ? 'זוגית' : 'אי-זוגית'}, ולכן ${fmt(n)} הוא ${EVEN_WORD(n)}.`],
+      ? [`מְסַדְּרִים ${n} בְּזוּגוֹת: ${even ? 'כֻּלָּם מִסְתַּדְּרִים בְּזוּגוֹת' : 'נִשְׁאָר אֶחָד לְבַד'}.`, `לָכֵן ${n} הוּא ${EVEN_WORD(n)}.`]
+      : [`סִפְרַת הַיְּחִידוֹת שֶׁל ${fmt(n)} הִיא ${u}.`, `${u} ${isEven(u) ? 'זוּגִית' : 'אִי-זוּגִית'}, וְלָכֵן ${fmt(n)} הוּא ${EVEN_WORD(n)}.`],
   });
 }
 
@@ -397,18 +392,18 @@ function genEoPick(level = 0) {
     type: 'eo_pick',
     topic: 'even_odd',
     ui: 'choice',
-    instruction: wantEven ? 'איזה מהמספרים זוגי?' : 'איזה מהמספרים אי-זוגי?',
+    instruction: wantEven ? 'אֵיזֶה מֵהַמִּסְפָּרִים זוּגִי?' : 'אֵיזֶה מֵהַמִּסְפָּרִים אִי-זוּגִי?',
     options: choiceOptions(fmt(correct), wrongs.map(fmt), true),
     answer: fmt(correct),
-    hint: 'מסתכלים על ספרת היחידות של כל מספר. זוגי נגמר ב-0, 2, 4, 6 או 8.',
+    hint: 'מִסְתַּכְּלִים עַל סִפְרַת הַיְּחִידוֹת שֶׁל כָּל מִסְפָּר. מִסְפָּר זוּגִי נִגְמָר בְּ-0, 2, 4, 6 אוֹ 8.',
     steps: [
-      `ספרת היחידות של ${fmt(correct)} היא ${correct % 10}.`,
-      `לכן ${fmt(correct)} הוא ${EVEN_WORD(correct)}, וכל השאר ${wantEven ? 'אי-זוגיים' : 'זוגיים'}.`,
+      `סִפְרַת הַיְּחִידוֹת שֶׁל ${fmt(correct)} הִיא ${correct % 10}.`,
+      `לָכֵן ${fmt(correct)} הוּא ${EVEN_WORD(correct)}, וְכָל הַשְּׁאָר ${wantEven ? 'אִי-זוּגִיִּים' : 'זוּגִיִּים'}.`,
     ],
   });
 }
 
-/** כל הסידורים של הספרות (בלי 0 בהתחלה) */
+/** כל הסידורים של הספרות */
 function perms(ds) {
   if (ds.length === 1) return [ds];
   const out = [];
@@ -431,13 +426,13 @@ function genEoBuild(level = 0) {
     type: 'eo_build',
     topic: 'even_odd',
     ui: 'choice',
-    instruction: `איזה מספר זוגי אפשר לבנות מהספרות ${list}? (כל ספרה פעם אחת)`,
+    instruction: `אֵיזֶה מִסְפָּר זוּגִי אֶפְשָׁר לִבְנוֹת מֵהַסְּפָרוֹת ${list}? (כָּל סִפְרָה פַּעַם אַחַת)`,
     options: choiceOptions(fmt(correct), oddsN.slice(0, 3).map(fmt), true),
     answer: fmt(correct),
-    hint: `מספר זוגי נגמר בספרה זוגית. איזו ספרה זוגית יש כאן?`,
+    hint: 'מִסְפָּר זוּגִי נִגְמָר בְּסִפְרָה זוּגִית. אֵיזוֹ סִפְרָה זוּגִית יֵשׁ כָּאן?',
     steps: [
-      `הספרה הזוגית היא ${evenDigit}, ולכן היא צריכה להיות בסוף (במקום היחידות).`,
-      `${fmt(correct)} נגמר ב-${evenDigit}, ולכן הוא זוגי.`,
+      `הַסִּפְרָה הַזּוּגִית הִיא ${evenDigit}, וְלָכֵן הִיא צְרִיכָה לִהְיוֹת בַּסּוֹף (בִּמְקוֹם הַיְּחִידוֹת).`,
+      `${fmt(correct)} נִגְמָר בְּ-${evenDigit}, וְלָכֵן הוּא זוּגִי.`,
     ],
   });
 }
@@ -448,18 +443,19 @@ function genEoNext(level = 0) {
   const n = level === 0 ? ri(3, 40) : ri(41, level === 1 ? 199 : 999);
   let ans = after ? n + 1 : n - 1;
   if (isEven(ans) !== wantEven) ans = after ? ans + 1 : ans - 1;
-  const kind = wantEven ? 'הזוגי' : 'האי-זוגי';
+  const kind = wantEven ? 'הַזּוּגִי' : 'הָאִי-זוּגִי';
+  const dir = after ? 'קָדִימָה' : 'אֲחוֹרָה';
   return Q({
     type: 'eo_next',
     topic: 'even_odd',
-    instruction: 'איזה מספר זה?',
-    expr: `המספר ${kind} ש${after ? 'בא אחרי' : 'בא לפני'} ${fmt(n)}`,
+    instruction: 'אֵיזֶה מִסְפָּר זֶה?',
+    expr: `הַמִּסְפָּר ${kind} שֶׁבָּא ${after ? 'אַחֲרֵי' : 'לִפְנֵי'} ${fmt(n)}`,
     exprRtl: true,
     answer: ans,
-    hint: `סופרים ${after ? 'קדימה' : 'אחורה'} מ-${fmt(n)} ועוצרים במספר ה${wantEven ? 'זוגי' : 'אי-זוגי'} הראשון.`,
+    hint: `סוֹפְרִים ${dir} מִ-${fmt(n)}, וְעוֹצְרִים בַּמִּסְפָּר ${kind} הָרִאשׁוֹן.`,
     steps: [
-      `סופרים ${after ? 'קדימה' : 'אחורה'}: ${after ? `${fmt(n + 1)}, ${fmt(n + 2)}` : `${fmt(n - 1)}, ${fmt(n - 2)}`}...`,
-      `המספר ${kind} הראשון הוא ${fmt(ans)}.`,
+      `סוֹפְרִים ${dir}: ${after ? `${fmt(n + 1)}, ${fmt(n + 2)}` : `${fmt(n - 1)}, ${fmt(n - 2)}`}...`,
+      `הַמִּסְפָּר ${kind} הָרִאשׁוֹן הוּא ${fmt(ans)}.`,
     ],
   });
 }
@@ -471,11 +467,11 @@ function genConsecSum(level = 1) {
     type: 'consec_sum',
     topic: 'even_odd',
     ui: 'mission',
-    instruction: 'חידת מספרים עוקבים:',
-    story: `שני מספרים עוקבים (אחד בא מיד אחרי השני) ביחד הם [[${fmt(sum)}]]. מה המספר הקטן מביניהם?`,
+    instruction: 'חִידַת מִסְפָּרִים עוֹקְבִים:',
+    story: `שְׁנֵי מִסְפָּרִים עוֹקְבִים (אֶחָד בָּא מִיָּד אַחֲרֵי הַשֵּׁנִי) בְּיַחַד הֵם [[${fmt(sum)}]]. מָה הַמִּסְפָּר הַקָּטָן מִבֵּינֵיהֶם?`,
     answer: k,
-    hint: 'שני מספרים עוקבים קרובים מאוד זה לזה. נסו מספר שקרוב לחצי של הסכום, ובדקו.',
-    steps: [`${fmt(k)} ו-${fmt(k + 1)} הם מספרים עוקבים.`, `${fmt(k)} + ${fmt(k + 1)} = ${fmt(sum)} ✔`],
+    hint: 'שְׁנֵי מִסְפָּרִים עוֹקְבִים קְרוֹבִים מְאוֹד זֶה לָזֶה. נַסּוּ מִסְפָּר שֶׁקָּרוֹב לַחֲצִי שֶׁל הַסְּכוּם, וּבִדְקוּ.',
+    steps: [`${fmt(k)} וְ-${fmt(k + 1)} הֵם מִסְפָּרִים עוֹקְבִים.`, `${fmt(k)} + ${fmt(k + 1)} = ${fmt(sum)} ✔`],
   });
 }
 
@@ -485,23 +481,23 @@ function genEoRule(level = 1) {
   const a = mk(kind !== 'oo');
   const b = mk(kind === 'ee');
   const even = isEven(a + b);
-  const why = kind === 'ee' ? 'זוגי ועוד זוגי - כל הזוגות נשארים זוגות.'
-    : kind === 'oo' ? 'לכל אחד מהם נשאר אחד לבד, ושני הבודדים יוצרים ביחד עוד זוג.'
-      : 'לאחד מהם נשאר אחד לבד, ואין לו בן זוג.';
+  const why = kind === 'ee' ? 'זוּגִי וְעוֹד זוּגִי - כָּל הַזּוּגוֹת נִשְׁאָרִים זוּגוֹת.'
+    : kind === 'oo' ? 'לְכָל אֶחָד מֵהֶם נִשְׁאָר אֶחָד לְבַד, וּשְׁנֵי הַבּוֹדְדִים יוֹצְרִים בְּיַחַד עוֹד זוּג.'
+      : 'לְאֶחָד מֵהֶם נִשְׁאָר אֶחָד לְבַד, וְאֵין לוֹ בֶּן זוּג.';
   return Q({
     type: 'eo_rule',
     topic: 'even_odd',
     ui: 'choice',
     noShuffle: true,
-    instruction: 'בלי לחשב: האם התוצאה זוגית או אי-זוגית?',
+    instruction: 'בְּלִי לְחַשֵּׁב: הַאִם הַתּוֹצָאָה זוּגִית אוֹ אִי-זוּגִית?',
     expr: `${a} + ${b}`,
-    options: [opt('זוגי', even), opt('אי-זוגי', !even)],
+    options: [opt('זוּגִי', even), opt('אִי-זוּגִי', !even)],
     answer: EVEN_WORD(a + b),
-    hint: 'בודקים אם כל אחד מהמספרים זוגי או אי-זוגי. מה קורה לזוגות כשמחברים?',
+    hint: 'בּוֹדְקִים אִם כָּל אֶחָד מֵהַמִּסְפָּרִים זוּגִי אוֹ אִי-זוּגִי. מָה קוֹרֶה לַזּוּגוֹת כְּשֶׁמְּחַבְּרִים?',
     steps: [
-      `${a} הוא ${EVEN_WORD(a)}, ו-${b} הוא ${EVEN_WORD(b)}.`,
+      `${a} הוּא ${EVEN_WORD(a)}, וְ-${b} הוּא ${EVEN_WORD(b)}.`,
       why,
-      `ובאמת: ${a} + ${b} = ${a + b}, מספר ${EVEN_WORD(a + b)}.`,
+      `וּבֶאֱמֶת: ${a} + ${b} = ${a + b}, מִסְפָּר ${EVEN_WORD(a + b)}.`,
     ],
   });
 }
@@ -521,10 +517,10 @@ function genFacts20() {
       topic: 'add_sub',
       expr: `${a} + ${b} = ?`,
       answer: ans,
-      hint: ans > 10 ? `משלימים קודם ל-10: ${big} + ${toTen} = 10, ואז מוסיפים את מה שנשאר.` : `מתחילים מ-${big} וסופרים עוד ${small}.`,
+      hint: ans > 10 ? `מַשְׁלִימִים קֹדֶם לְ-10: ${big} + ${toTen} = 10, וְאָז מוֹסִיפִים אֶת מָה שֶׁנִּשְׁאַר.` : `מַתְחִילִים מִ-${big} וְסוֹפְרִים עוֹד ${small}.`,
       steps: ans > 10
-        ? [`מפרקים את ${small} ל-${toTen} ו-${small - toTen}.`, `${big} + ${toTen} = 10.`, `10 + ${small - toTen} = ${ans}.`]
-        : [`מתחילים מ-${big} וסופרים עוד ${small}.`, `${a} + ${b} = ${ans}.`],
+        ? [`מְפָרְקִים אֶת ${small} לְ-${toTen} וְ-${small - toTen}.`, `${big} + ${toTen} = 10.`, `10 + ${small - toTen} = ${ans}.`]
+        : [`מַתְחִילִים מִ-${big} וְסוֹפְרִים עוֹד ${small}.`, `${a} + ${b} = ${ans}.`],
     });
   }
   const c = ri(6, 20);
@@ -536,10 +532,10 @@ function genFacts20() {
     topic: 'add_sub',
     expr: `${c} - ${b} = ?`,
     answer: ans,
-    hint: `אפשר לחשוב על חיבור: כמה צריך להוסיף ל-${b} כדי להגיע ל-${c}?`,
+    hint: `אֶפְשָׁר לַחְשֹׁב עַל חִבּוּר: כַּמָּה צָרִיךְ לְהוֹסִיף לְ-${b} כְּדֵי לְהַגִּיעַ לְ-${c}?`,
     steps: cross
-      ? [`מפרקים את ${b} ל-${c - 10} ו-${b - (c - 10)}.`, `${c} - ${c - 10} = 10.`, `10 - ${b - (c - 10)} = ${ans}.`]
-      : [`${c} - ${b} = ${ans}.`, `בדיקה: ${ans} + ${b} = ${c}.`],
+      ? [`מְפָרְקִים אֶת ${b} לְ-${c - 10} וְ-${b - (c - 10)}.`, `${c} - ${c - 10} = 10.`, `10 - ${b - (c - 10)} = ${ans}.`]
+      : [`${c} - ${b} = ${ans}.`, `בְּדִיקָה: ${ans} + ${b} = ${c}.`],
   });
 }
 
@@ -559,13 +555,13 @@ function genAdd2d1d(level = 0) {
     if (!regroup) {
       steps = [`${a} = ${tens} + ${u}.`, `${u} + ${b} = ${u + b}.`, `${tens} + ${u + b} = ${ans}.`];
     } else if (b === need) {
-      steps = [`${u} + ${b} = 10, כלומר עוד עשרת שלמה.`, `${a} + ${b} = ${ans}.`];
+      steps = [`${u} + ${b} = 10, כְּלוֹמַר עוֹד עֲשֶׂרֶת שְׁלֵמָה.`, `${a} + ${b} = ${ans}.`];
     } else {
-      steps = [`משלימים לעשרת הבאה: ${a} + ${need} = ${a + need}.`, `מתוך ${b} נשארו עוד ${b - need}.`, `${a + need} + ${b - need} = ${ans}.`];
+      steps = [`מַשְׁלִימִים לָעֲשֶׂרֶת הַבָּאָה: ${a} + ${need} = ${a + need}.`, `מִתּוֹךְ ${b} נִשְׁאֲרוּ עוֹד ${b - need}.`, `${a + need} + ${b - need} = ${ans}.`];
     }
     return Q({
       type: 'add_2d1d', topic: 'add_sub', expr: `${a} + ${b} = ?`, answer: ans,
-      hint: regroup ? `משלימים קודם לעשרת הבאה (${a + need}), ואז מוסיפים את מה שנשאר.` : 'מחברים את היחידות ליחידות. העשרות נשארות.',
+      hint: regroup ? `מַשְׁלִימִים קֹדֶם לָעֲשֶׂרֶת הַבָּאָה (${a + need}), וְאָז מוֹסִיפִים אֶת מָה שֶׁנִּשְׁאַר.` : 'מְחַבְּרִים אֶת הַיְּחִידוֹת לַיְּחִידוֹת. הָעֲשָׂרוֹת נִשְׁאָרוֹת.',
       steps,
     });
   }
@@ -580,15 +576,15 @@ function genAdd2d1d(level = 0) {
   if (!regroup) {
     steps = [`${a} = ${tens} + ${u}.`, `${u} - ${b} = ${u - b}.`, `${tens} + ${u - b} = ${ans}.`];
   } else if (u === 0) {
-    steps = [`${a} - 10 = ${a - 10}.`, `הורדנו ${10 - b} יותר מדי, ולכן מחזירים: ${a - 10} + ${10 - b} = ${ans}.`];
+    steps = [`${a} - 10 = ${a - 10}.`, `הוֹרַדְנוּ ${10 - b} יוֹתֵר מִדַּי, וְלָכֵן מַחְזִירִים: ${a - 10} + ${10 - b} = ${ans}.`];
   } else {
-    steps = [`קודם יורדים לעשרת השלמה: ${a} - ${u} = ${tens}.`, `מתוך ${b} נשארו עוד ${b - u} להוריד.`, `${tens} - ${b - u} = ${ans}.`];
+    steps = [`קֹדֶם יוֹרְדִים לָעֲשֶׂרֶת הַשְּׁלֵמָה: ${a} - ${u} = ${tens}.`, `מִתּוֹךְ ${b} נִשְׁאֲרוּ עוֹד ${b - u} לְהוֹרִיד.`, `${tens} - ${b - u} = ${ans}.`];
   }
-  let hint = 'מורידים את היחידות מהיחידות. העשרות נשארות.';
+  let hint = 'מוֹרִידִים אֶת הַיְּחִידוֹת מֵהַיְּחִידוֹת. הָעֲשָׂרוֹת נִשְׁאָרוֹת.';
   if (regroup) {
     hint = u === 0
-      ? `אפשר להוריד 10 ואז להחזיר את מה שהורדנו יותר מדי.`
-      : `קודם מורידים ${u} כדי להגיע ל-${tens}, ואז את השאר.`;
+      ? 'אֶפְשָׁר לְהוֹרִיד 10, וְאָז לְהַחְזִיר אֶת מָה שֶׁהוֹרַדְנוּ יוֹתֵר מִדַּי.'
+      : `קֹדֶם מוֹרִידִים ${u} כְּדֵי לְהַגִּיעַ לְ-${tens}, וְאָז אֶת הַשְּׁאָר.`;
   }
   return Q({
     type: 'add_2d1d', topic: 'add_sub', expr: `${a} - ${b} = ?`, answer: ans, hint, steps,
@@ -608,11 +604,11 @@ function genAdd2d2d(level = 1) {
     const a = ta * 10 + ua;
     const b = tb * 10 + ub;
     const ans = a + b;
-    const steps = [`מוסיפים את העשרות: ${a} + ${tb * 10} = ${a + tb * 10}.`];
-    if (ub) steps.push(`מוסיפים את היחידות: ${a + tb * 10} + ${ub} = ${ans}.`);
+    const steps = [`מוֹסִיפִים אֶת הָעֲשָׂרוֹת: ${a} + ${tb * 10} = ${a + tb * 10}.`];
+    if (ub) steps.push(`מוֹסִיפִים אֶת הַיְּחִידוֹת: ${a + tb * 10} + ${ub} = ${ans}.`);
     return Q({
       type: 'add_2d2d', topic: 'add_sub', expr: `${a} + ${b} = ?`, answer: ans,
-      hint: `מפרקים את ${b} לעשרות ויחידות: ${tb * 10} ו-${ub}. קודם מוסיפים את העשרות, אחר כך את היחידות.`,
+      hint: `מְפָרְקִים אֶת ${b} לַעֲשָׂרוֹת וְלִיחִידוֹת: ${tb * 10} וְ-${ub}. קֹדֶם מוֹסִיפִים אֶת הָעֲשָׂרוֹת, וְאַחַר כָּךְ אֶת הַיְּחִידוֹת.`,
       steps,
     });
   }
@@ -625,11 +621,11 @@ function genAdd2d2d(level = 1) {
   const a = ta * 10 + ua;
   const b = tb * 10 + ub;
   const ans = a - b;
-  const steps = [`מורידים את העשרות: ${a} - ${tb * 10} = ${a - tb * 10}.`];
-  if (ub) steps.push(`מורידים את היחידות: ${a - tb * 10} - ${ub} = ${ans}.`);
+  const steps = [`מוֹרִידִים אֶת הָעֲשָׂרוֹת: ${a} - ${tb * 10} = ${a - tb * 10}.`];
+  if (ub) steps.push(`מוֹרִידִים אֶת הַיְּחִידוֹת: ${a - tb * 10} - ${ub} = ${ans}.`);
   return Q({
     type: 'add_2d2d', topic: 'add_sub', expr: `${a} - ${b} = ?`, answer: ans,
-    hint: `מפרקים את ${b} לעשרות ויחידות: ${tb * 10} ו-${ub}. קודם מורידים את העשרות, אחר כך את היחידות.`,
+    hint: `מְפָרְקִים אֶת ${b} לַעֲשָׂרוֹת וְלִיחִידוֹת: ${tb * 10} וְ-${ub}. קֹדֶם מוֹרִידִים אֶת הָעֲשָׂרוֹת, וְאַחַר כָּךְ אֶת הַיְּחִידוֹת.`,
     steps,
   });
 }
@@ -637,7 +633,7 @@ function genAdd2d2d(level = 1) {
 /* --- עשרות שלמות ומאות שלמות --- */
 function genTens(level = 0) {
   const unit = level === 2 && Math.random() < 0.6 ? 100 : 10;
-  const word = unit === 100 ? 'מאות' : 'עשרות';
+  const word = unit === 100 ? 'מֵאוֹת' : 'עֲשָׂרוֹת';
   let a = ri(1, 9) * unit;
   let b = ri(1, 9) * unit;
   let add = Math.random() < 0.5;
@@ -645,11 +641,12 @@ function genTens(level = 0) {
   if (!add && b > a) [a, b] = [b, a];
   const ans = add ? a + b : a - b;
   const op = add ? '+' : '-';
+  const opWord = add ? 'וְעוֹד' : 'פָּחוֹת';
   return Q({
     type: 'tens', topic: 'add_sub', expr: `${fmt(a)} ${op} ${fmt(b)} = ?`, answer: ans,
-    hint: `חושבים על ${word}: ${a / unit} ${word} ${add ? 'ועוד' : 'פחות'} ${b / unit} ${word}.`,
+    hint: `חוֹשְׁבִים עַל ${word}: ${a / unit} ${word} ${opWord} ${b / unit} ${word}.`,
     steps: [
-      `${a / unit} ${word} ${add ? 'ועוד' : 'פחות'} ${b / unit} ${word} = ${ans / unit} ${word}.`,
+      `${a / unit} ${word} ${opWord} ${b / unit} ${word} = ${ans / unit} ${word}.`,
       `${fmt(a)} ${op} ${fmt(b)} = ${fmt(ans)}.`,
     ],
   });
@@ -662,14 +659,14 @@ function genMental3(level = 2) {
   const base = h * 100 + t * 10;
   const kind = pick(level >= 2 ? ['h', 't', 'tu', 'subH', 'subT'] : ['h', 't', 'subH']);
   let other, ans, op = '+', why;
-  if (kind === 'h') { other = ri(1, 9 - h) * 100; ans = base + other; why = 'מוסיפים מאות למאות.'; }
-  else if (kind === 't') { other = ri(1, 9 - t) * 10; ans = base + other; why = 'מוסיפים עשרות לעשרות.'; }
-  else if (kind === 'tu') { other = ri(1, 9 - t) * 10 + ri(1, 9); ans = base + other; why = 'מוסיפים עשרות לעשרות ויחידות ליחידות.'; }
-  else if (kind === 'subH') { other = ri(1, h) * 100; ans = base - other; op = '-'; why = 'מורידים מאות מהמאות.'; }
-  else { other = ri(1, t) * 10; ans = base - other; op = '-'; why = 'מורידים עשרות מהעשרות.'; }
+  if (kind === 'h') { other = ri(1, 9 - h) * 100; ans = base + other; why = 'מוֹסִיפִים מֵאוֹת לַמֵּאוֹת.'; }
+  else if (kind === 't') { other = ri(1, 9 - t) * 10; ans = base + other; why = 'מוֹסִיפִים עֲשָׂרוֹת לָעֲשָׂרוֹת.'; }
+  else if (kind === 'tu') { other = ri(1, 9 - t) * 10 + ri(1, 9); ans = base + other; why = 'מוֹסִיפִים עֲשָׂרוֹת לָעֲשָׂרוֹת, וִיחִידוֹת לַיְּחִידוֹת.'; }
+  else if (kind === 'subH') { other = ri(1, h) * 100; ans = base - other; op = '-'; why = 'מוֹרִידִים מֵאוֹת מֵהַמֵּאוֹת.'; }
+  else { other = ri(1, t) * 10; ans = base - other; op = '-'; why = 'מוֹרִידִים עֲשָׂרוֹת מֵהָעֲשָׂרוֹת.'; }
   return Q({
     type: 'mental3', topic: 'add_sub', expr: `${fmt(base)} ${op} ${fmt(other)} = ?`, answer: ans,
-    hint: 'חושבים לפי ערך המקום: מאות עם מאות, עשרות עם עשרות, יחידות עם יחידות.',
+    hint: 'חוֹשְׁבִים לְפִי עֵרֶךְ הַמָּקוֹם: מֵאוֹת עִם מֵאוֹת, עֲשָׂרוֹת עִם עֲשָׂרוֹת, יְחִידוֹת עִם יְחִידוֹת.',
     steps: [why, `${fmt(base)} ${op} ${fmt(other)} = ${fmt(ans)}.`],
   });
 }
@@ -689,30 +686,30 @@ function genMissAdd(level = 0) {
     else if (form === 'ax') expr = `${b} + ? = ${c}`;
     else expr = `${c} = ? + ${b}`;
     check = `${x} + ${b} = ${c}`;
-    hint = `איזה מספר ועוד ${b} נותן ${c}? אפשר לנסות מספר ולבדוק, או לחשב ${c} - ${b}.`;
+    hint = `אֵיזֶה מִסְפָּר וְעוֹד ${b} נוֹתֵן ${c}? אֶפְשָׁר לְנַסּוֹת מִסְפָּר וְלִבְדֹּק, אוֹ לְחַשֵּׁב ${c} - ${b}.`;
   } else if (form === 'ax-') {
     const a = ri(level === 0 ? 5 : 20, max);
     x = ri(1, a - 1);
     const d = a - x;
     expr = `${a} - ? = ${d}`;
     check = `${a} - ${x} = ${d}`;
-    hint = `כמה צריך להוריד מ-${a} כדי להגיע ל-${d}? אפשר לספור מ-${d} עד ${a}.`;
+    hint = `כַּמָּה צָרִיךְ לְהוֹרִיד מִ-${a} כְּדֵי לְהַגִּיעַ לְ-${d}? אֶפְשָׁר לִסְפֹּר מִ-${d} עַד ${a}.`;
   } else {
     const b = ri(2, 9);
     x = ri(b + 5, max);
     const d = x - b;
     expr = `? - ${b} = ${d}`;
     check = `${x} - ${b} = ${d}`;
-    hint = `הורידו ${b} ונשאר ${d}. כדי למצוא מה היה בהתחלה - מחזירים את מה שהורידו.`;
+    hint = `הוֹרִידוּ ${b} וְנִשְׁאַר ${d}. כְּדֵי לִמְצֹא מָה הָיָה בַּהַתְחָלָה - מַחְזִירִים אֶת מָה שֶׁהוֹרִידוּ.`;
   }
   return Q({
     type: 'miss_add',
     topic: 'missing',
-    instruction: 'איזה מספר חסר?',
+    instruction: 'אֵיזֶה מִסְפָּר חָסֵר?',
     expr,
     answer: x,
     hint,
-    steps: [`המספר החסר הוא ${x}.`, `בדיקה: ${check} ✔`],
+    steps: [`הַמִּסְפָּר הֶחָסֵר הוּא ${x}.`, `בְּדִיקָה: ${check} ✔`],
   });
 }
 
@@ -729,16 +726,16 @@ function genInverse(level = 0) {
   return Q({
     type: 'inverse',
     topic: 'missing',
-    instruction: 'בעזרת התרגיל הפתור - בלי לחשב מחדש:',
+    instruction: 'בְּעֶזְרַת הַתַּרְגִּיל הַפָּתוּר - בְּלִי לְחַשֵּׁב מֵחָדָשׁ:',
     given: `${a} + ${b} = ${c}`,
     expr,
     answer: ans,
     hint: kind === 'b+a'
-      ? 'בחיבור אפשר להחליף את הסדר - התוצאה לא משתנה.'
-      : 'חיבור וחיסור הם פעולות הפוכות: מה שמוסיפים, אפשר גם להוריד בחזרה.',
+      ? 'בְּחִבּוּר אֶפְשָׁר לְהַחְלִיף אֶת הַסֵּדֶר - הַתּוֹצָאָה לֹא מִשְׁתַּנָּה.'
+      : 'חִבּוּר וְחִסּוּר הֵם פְּעֻלּוֹת הֲפוּכוֹת: אֶת מָה שֶׁמּוֹסִיפִים, אֶפְשָׁר גַּם לְהוֹרִיד בַּחֲזָרָה.',
     steps: kind === 'b+a'
-      ? [`${a} + ${b} = ${c}, והחלפת הסדר לא משנה את התוצאה.`, `${b} + ${a} = ${c}.`]
-      : [`${a} + ${b} = ${c}.`, `לכן ${expr.replace('?', String(ans))}.`],
+      ? [`${a} + ${b} = ${c}, וְהַחְלָפַת הַסֵּדֶר לֹא מְשַׁנָּה אֶת הַתּוֹצָאָה.`, `${b} + ${a} = ${c}.`]
+      : [`${a} + ${b} = ${c}.`, `לָכֵן ${expr.replace('?', String(ans))}.`],
   });
 }
 
@@ -752,8 +749,8 @@ function genZero(level = 0) {
     topic: 'missing',
     expr,
     answer: ans,
-    hint: form === 'n-n' ? 'מורידים את כל מה שיש. מה נשאר?' : 'כשמוסיפים או מורידים 0 - לא משתנה כלום.',
-    steps: [form === 'n-n' ? 'מספר פחות עצמו שווה 0.' : 'הוספה או הורדה של 0 לא משנה את המספר.', expr.replace('?', fmt(ans))],
+    hint: form === 'n-n' ? 'מוֹרִידִים אֶת כָּל מָה שֶׁיֵּשׁ. מָה נִשְׁאָר?' : 'כְּשֶׁמּוֹסִיפִים אוֹ מוֹרִידִים 0 - שׁוּם דָּבָר לֹא מִשְׁתַּנֶּה.',
+    steps: [form === 'n-n' ? 'מִסְפָּר פָּחוֹת עַצְמוֹ שָׁוֶה 0.' : 'הוֹסָפָה אוֹ הוֹרָדָה שֶׁל 0 לֹא מְשַׁנָּה אֶת הַמִּסְפָּר.', expr.replace('?', fmt(ans))],
   });
 }
 
@@ -765,23 +762,24 @@ function genCancel(level = 1) {
   return Q({
     type: 'cancel',
     topic: 'missing',
-    instruction: 'פתרו בדרך הקצרה:',
+    instruction: 'פִּתְרוּ בַּדֶּרֶךְ הַקְּצָרָה:',
     expr,
     answer: a,
-    hint: `${addFirst ? 'מוסיפים' : 'מורידים'} ${b} ואז ${addFirst ? 'מורידים' : 'מוסיפים'} אותו בחזרה. לאן חוזרים?`,
+    hint: `${addFirst ? 'מוֹסִיפִים' : 'מוֹרִידִים'} ${b}, וְאָז ${addFirst ? 'מוֹרִידִים' : 'מוֹסִיפִים'} אוֹתוֹ בַּחֲזָרָה. לְאָן חוֹזְרִים?`,
     steps: [
-      `${addFirst ? `+ ${b} ואחריו - ${b}` : `- ${b} ואחריו + ${b}`} מבטלים זה את זה.`,
-      `לכן התוצאה היא המספר שהתחלנו ממנו: ${a}.`,
+      `${addFirst ? `+ ${b} וְאַחֲרָיו - ${b}` : `- ${b} וְאַחֲרָיו + ${b}`} מְבַטְּלִים זֶה אֶת זֶה.`,
+      `לָכֵן הַתּוֹצָאָה הִיא הַמִּסְפָּר שֶׁהִתְחַלְנוּ מִמֶּנּוּ: ${a}.`,
     ],
   });
 }
 
 /* ============================ ב1. אומדן והשוואה ============================ */
 
-const REL3 = (v, target) => (v > target ? 'גדול' : v < target ? 'קטן' : 'שווה');
+const BIG = 'גָּדוֹל מִ-100';
+const SAME = 'שָׁוֶה לְ-100';
+const SMALL = 'קָטָן מִ-100';
 
 function genEstimate(level = 0) {
-  const target = 100;
   let expr, val;
   if (level === 0) {
     const a = ri(2, 8) * 10; const b = ri(2, 8) * 10;
@@ -796,20 +794,22 @@ function genEstimate(level = 0) {
     const a = ri(20, 45); const b = ri(20, 45); const c = ri(10, 40);
     expr = `${a} + ${b} + ${c}`; val = a + b + c;
   }
-  const rel = REL3(val, target);
+  const rel = val > 100 ? BIG : val < 100 ? SMALL : SAME;
   return Q({
     type: 'estimate',
     topic: 'insight',
     ui: 'choice',
     noShuffle: true,
-    instruction: `האם התוצאה גדולה מ-100, קטנה מ-100 או שווה ל-100?`,
+    instruction: 'הַאִם הַתּוֹצָאָה גְּדוֹלָה מִ-100, קְטַנָּה מִ-100 אוֹ שָׁוָה לְ-100?',
     expr,
-    options: [opt('גדול מ-100', rel === 'גדול'), opt('שווה ל-100', rel === 'שווה'), opt('קטן מ-100', rel === 'קטן')],
-    answer: rel === 'שווה' ? 'שווה ל-100' : `${rel} מ-100`,
-    hint: 'אפשר לעגל לעשרות ולהעריך. למשל: 50 ועוד 50 הם בדיוק 100.',
-    steps: [`${expr} = ${fmt(val)}.`, rel === 'שווה' ? 'התוצאה שווה בדיוק ל-100.' : `${fmt(val)} ${rel} מ-100.`],
+    options: [opt(BIG, rel === BIG), opt(SAME, rel === SAME), opt(SMALL, rel === SMALL)],
+    answer: rel,
+    hint: 'אֶפְשָׁר לְעַגֵּל לַעֲשָׂרוֹת וּלְהַעֲרִיךְ. לְמָשָׁל: 50 וְעוֹד 50 הֵם בְּדִיּוּק 100.',
+    steps: [`${expr} = ${fmt(val)}.`, rel === SAME ? 'הַתּוֹצָאָה שָׁוָה בְּדִיּוּק לְ-100.' : `${fmt(val)} ${rel}.`],
   });
 }
+
+const EQUAL_RESULTS = 'הַתּוֹצָאוֹת שָׁווֹת';
 
 function genCompareExprs(level = 0) {
   const kinds = level === 0 ? ['addSame'] : level === 1 ? ['addSame', 'subSame', 'swap'] : ['addSame', 'subSame', 'near', 'swap'];
@@ -819,21 +819,21 @@ function genCompareExprs(level = 0) {
     const n = level === 0 ? ri(3, 12) : ri(20, 80);
     const x = ri(1, level === 0 ? 8 : 15); let y = ri(1, level === 0 ? 8 : 15); if (y === x) y = x + 2;
     e1 = `${n} + ${x}`; e2 = `${n} + ${y}`; v1 = n + x; v2 = n + y;
-    why = `בשני התרגילים מתחילים מ-${n}. מי שמוסיף יותר - מקבל יותר.`;
+    why = `בִּשְׁנֵי הַתַּרְגִּילִים מַתְחִילִים מִ-${n}. מִי שֶׁמּוֹסִיף יוֹתֵר - מְקַבֵּל יוֹתֵר.`;
   } else if (kind === 'subSame') {
     const n = ri(40, 120);
     const x = ri(5, 20); let y = ri(5, 20); if (y === x) y = x + 2;
     e1 = `${n} - ${x}`; e2 = `${n} - ${y}`; v1 = n - x; v2 = n - y;
-    why = `בשני התרגילים מתחילים מ-${n}. מי שמוריד פחות - נשאר לו יותר.`;
+    why = `בִּשְׁנֵי הַתַּרְגִּילִים מַתְחִילִים מִ-${n}. מִי שֶׁמּוֹרִיד פָּחוֹת - נִשְׁאָר לוֹ יוֹתֵר.`;
   } else if (kind === 'near') {
     const a = ri(1, 7) * 10 + ri(6, 9); const b = ri(1, 7) * 10 + ri(6, 9);
     const ra = Math.ceil(a / 10) * 10; const rb = Math.ceil(b / 10) * 10;
     [e1, e2, v1, v2] = Math.random() < 0.5 ? [`${a} + ${b}`, `${ra} + ${rb}`, a + b, ra + rb] : [`${ra} + ${rb}`, `${a} + ${b}`, ra + rb, a + b];
-    why = `${ra} גדול מ-${a}, ו-${rb} גדול מ-${b}, ולכן ${ra} + ${rb} גדול יותר.`;
+    why = `${ra} גָּדוֹל מִ-${a}, וְ-${rb} גָּדוֹל מִ-${b}, וְלָכֵן ${ra} + ${rb} גָּדוֹל יוֹתֵר.`;
   } else {
     const a = ri(12, 35); const b = ri(36, 60);
     [e1, e2] = shuffle([`${a} + ${b}`, `${b} + ${a}`]); v1 = v2 = a + b;
-    why = 'אותם מספרים בסדר אחר - בחיבור התוצאה לא משתנה.';
+    why = 'אוֹתָם מִסְפָּרִים בְּסֵדֶר אַחֵר - בְּחִבּוּר הַתּוֹצָאָה לֹא מִשְׁתַּנָּה.';
   }
   const best = v1 > v2 ? 0 : v2 > v1 ? 1 : 2;
   return Q({
@@ -841,11 +841,11 @@ function genCompareExprs(level = 0) {
     topic: 'insight',
     ui: 'choice',
     noShuffle: true,
-    instruction: 'בלי לפתור: באיזה תרגיל התוצאה גדולה יותר?',
-    options: [opt(e1, best === 0, true), opt(e2, best === 1, true), opt('התוצאות שוות', best === 2)],
-    answer: best === 2 ? 'התוצאות שוות' : best === 0 ? e1 : e2,
-    hint: 'מחפשים מה דומה בשני התרגילים ומה שונה. מה שונה - משנה את התוצאה.',
-    steps: [why, `(בדיקה: ${e1} = ${v1}, ${e2} = ${v2}.)`],
+    instruction: 'בְּלִי לִפְתֹּר: בְּאֵיזֶה תַּרְגִּיל הַתּוֹצָאָה גְּדוֹלָה יוֹתֵר?',
+    options: [opt(e1, best === 0, true), opt(e2, best === 1, true), opt(EQUAL_RESULTS, best === 2)],
+    answer: best === 2 ? EQUAL_RESULTS : best === 0 ? e1 : e2,
+    hint: 'מְחַפְּשִׂים מָה דּוֹמֶה בִּשְׁנֵי הַתַּרְגִּילִים וּמָה שׁוֹנֶה. מָה שֶׁשּׁוֹנֶה - מְשַׁנֶּה אֶת הַתּוֹצָאָה.',
+    steps: [why, `(בְּדִיקָה: ${e1} = ${v1}, ${e2} = ${v2}.)`],
   });
 }
 
@@ -874,20 +874,20 @@ function genCompareSign(level = 0) {
   }
   if (Math.random() < 0.5) { [left, right, lv, rv] = [right, left, rv, lv]; }
   const sign = lv < rv ? '<' : lv > rv ? '>' : '=';
-  const words = sign === '<' ? 'קטן מ' : sign === '>' ? 'גדול מ' : 'שווה ל';
+  const words = sign === '<' ? 'קָטָן מִ' : sign === '>' ? 'גָּדוֹל מִ' : 'שָׁוֶה לְ';
   return Q({
     type: 'compare_sign',
     topic: 'insight',
     ui: 'choice',
     noShuffle: true,
-    instruction: 'איזה סימן מתאים במקום הריבוע?',
+    instruction: 'אֵיזֶה סִימָן מַתְאִים בִּמְקוֹם הָרִבּוּעַ?',
     expr: `${left} ▢ ${right}`,
     options: [opt('<', sign === '<', true), opt('=', sign === '=', true), opt('>', sign === '>', true)],
     answer: sign,
-    hint: 'הפה של הסימנים < ו-> תמיד פתוח לכיוון המספר הגדול יותר.',
+    hint: `הַפֶּה שֶׁל הַסִּימָנִים ${ltrIsolate('<')} וְ-${ltrIsolate('>')} תָּמִיד פָּתוּחַ לְכִוּוּן הַמִּסְפָּר הַגָּדוֹל יוֹתֵר.`,
     steps: [
-      `בצד השמאלי: ${fmt(lv)}. בצד הימני: ${fmt(rv)}.`,
-      `${fmt(lv)} ${words}-${fmt(rv)}, ולכן: ${ltrIsolate(`${left} ${sign} ${right}`)}`,
+      `בַּצַּד הַשְּׂמָאלִי: ${fmt(lv)}. בַּצַּד הַיְּמָנִי: ${fmt(rv)}.`,
+      `${fmt(lv)} ${words}-${fmt(rv)}, וְלָכֵן: ${ltrIsolate(`${left} ${sign} ${right}`)}`,
     ],
   });
 }
@@ -903,21 +903,24 @@ function genOrder3(level = 2) {
     type: 'order3',
     topic: 'insight',
     ui: 'choice',
-    instruction: `בלי לפתור: באיזה תרגיל התוצאה ${biggest ? 'הכי גדולה' : 'הכי קטנה'}?`,
+    instruction: `בְּלִי לִפְתֹּר: בְּאֵיזֶה תַּרְגִּיל הַתּוֹצָאָה ${biggest ? 'הֲכִי גְּדוֹלָה' : 'הֲכִי קְטַנָּה'}?`,
     options: shuffle(exprs.map((e, i) => opt(e, i === idx, true))),
     answer: exprs[idx],
-    hint: `בכל התרגילים מוסיפים ל-${fmt(base)}. משווים רק את המספר השני.`,
-    steps: [`המספרים שמוסיפים: ${[a, b, c].join(', ')}.`, `${biggest ? 'הכי גדול' : 'הכי קטן'} מביניהם נמצא בתרגיל ${exprs[idx]}.`],
+    hint: `בְּכָל הַתַּרְגִּילִים מוֹסִיפִים לְ-${fmt(base)}. מַשְׁוִים רַק אֶת הַמִּסְפָּר הַשֵּׁנִי.`,
+    steps: [`הַמִּסְפָּרִים שֶׁמּוֹסִיפִים: ${[a, b, c].join(', ')}.`, `${biggest ? 'הֲכִי גָּדוֹל' : 'הֲכִי קָטָן'} מִבֵּינֵיהֶם נִמְצָא בַּתַּרְגִּיל ${exprs[idx]}.`],
   });
 }
 
 /* ============================ ב3. שאלות חיבור וחיסור, כסף ועודף ============================ */
 
+const MISSION = 'מְשִׂימָה:';
+const SHEKELS = 'שְׁקָלִים';
+
 function genWordCompare(level = 0) {
   const max = level === 0 ? 20 : 90;
   const [p1, p2] = twoPeople();
   const th = pick(THINGS);
-  const kind = pick(level === 0 ? ['more', 'less', 'diff'] : level === 1 ? ['more', 'less', 'diff'] : ['diff', 'more', 'reverse']);
+  const kind = pick(level < 2 ? ['more', 'less', 'diff'] : ['diff', 'more', 'reverse']);
   const a = ri(5, max - 10);
   const d = ri(2, level === 0 ? 8 : 25);
   if (kind === 'more' || kind === 'less') {
@@ -925,30 +928,30 @@ function genWordCompare(level = 0) {
     const b = more ? a + d : Math.max(1, a - d);
     const dd = more ? d : a - b;
     return Q({
-      type: 'word_compare', topic: 'word_add', ui: 'mission', instruction: 'משימה:', unit: th.name,
-      story: `ל${p1.n} יש [[${a}]] ${th.name}. ל${p2.n} יש [[${dd}]] ${th.name} ${more ? 'יותר' : 'פחות'}. כמה ${th.name} יש ל${p2.n}?`,
+      type: 'word_compare', topic: 'word_add', ui: 'mission', instruction: MISSION, unit: th,
+      story: `לְ${p1.n} יֵשׁ [[${a}]] ${th}. לְ${p2.n} יֵשׁ [[${dd}]] ${th} ${more ? 'יוֹתֵר' : 'פָּחוֹת'}. כַּמָּה ${th} יֵשׁ לְ${p2.n}?`,
       answer: b,
-      hint: more ? `ל${p2.n} יש כמו ל${p1.n}, ועוד ${dd}.` : `ל${p2.n} יש כמו ל${p1.n}, בלי ${dd}.`,
-      steps: [`${a} ${more ? '+' : '-'} ${dd} = ${b}.`, `ל${p2.n} יש ${b} ${th.name}.`],
+      hint: more ? `לְ${p2.n} יֵשׁ כְּמוֹ לְ${p1.n}, וְעוֹד ${dd}.` : `לְ${p2.n} יֵשׁ כְּמוֹ לְ${p1.n}, בְּלִי ${dd}.`,
+      steps: [`${a} ${more ? '+' : '-'} ${dd} = ${b}.`, `לְ${p2.n} יֵשׁ ${b} ${th}.`],
     });
   }
   if (kind === 'diff') {
     const b = a + d;
     return Q({
-      type: 'word_compare', topic: 'word_add', ui: 'mission', instruction: 'משימה:', unit: th.name,
-      story: `ל${p1.n} יש [[${a}]] ${th.name}, ול${p2.n} יש [[${b}]] ${th.name}. כמה ${th.name} יש ל${p2.n} יותר מאשר ל${p1.n}?`,
+      type: 'word_compare', topic: 'word_add', ui: 'mission', instruction: MISSION, unit: th,
+      story: `לְ${p1.n} יֵשׁ [[${a}]] ${th}, וּלְ${p2.n} יֵשׁ [[${b}]] ${th}. כַּמָּה ${th} יֵשׁ לְ${p2.n} יוֹתֵר מֵאֲשֶׁר לְ${p1.n}?`,
       answer: d,
-      hint: `כמה צריך להוסיף ל-${a} כדי להגיע ל-${b}?`,
-      steps: [`${b} - ${a} = ${d}.`, `ל${p2.n} יש ${d} ${th.name} יותר.`],
+      hint: `כַּמָּה צָרִיךְ לְהוֹסִיף לְ-${a} כְּדֵי לְהַגִּיעַ לְ-${b}?`,
+      steps: [`${b} - ${a} = ${d}.`, `לְ${p2.n} יֵשׁ ${d} ${th} יוֹתֵר.`],
     });
   }
   const b = a + d;
   return Q({
-    type: 'word_compare', topic: 'word_add', ui: 'mission', instruction: 'משימה:', unit: th.name,
-    story: `ל${p1.n} יש [[${b}]] ${th.name}. זה [[${d}]] יותר ממה שיש ל${p2.n}. כמה ${th.name} יש ל${p2.n}?`,
+    type: 'word_compare', topic: 'word_add', ui: 'mission', instruction: MISSION, unit: th,
+    story: `לְ${p1.n} יֵשׁ [[${b}]] ${th}. זֶה [[${d}]] יוֹתֵר מִמָּה שֶׁיֵּשׁ לְ${p2.n}. כַּמָּה ${th} יֵשׁ לְ${p2.n}?`,
     answer: a,
-    hint: `ל${p1.n} יש יותר. אז ל${p2.n} יש פחות - בדיוק ${d} פחות.`,
-    steps: [`ל${p2.n} יש ${d} פחות מאשר ל${p1.n}.`, `${b} - ${d} = ${a}.`],
+    hint: `לְ${p1.n} יֵשׁ יוֹתֵר. אָז לְ${p2.n} יֵשׁ פָּחוֹת - בְּדִיּוּק ${d} פָּחוֹת.`,
+    steps: [`לְ${p2.n} יֵשׁ ${d} פָּחוֹת מֵאֲשֶׁר לְ${p1.n}.`, `${b} - ${d} = ${a}.`],
   });
 }
 
@@ -957,14 +960,16 @@ function genWordCollect(level = 0) {
   const max = level === 0 ? 6 : 30;
   const [a, b, c] = [ri(2, max), ri(2, max), ri(2, max)];
   const sum = a + b + c;
+  const bought = g(p, 'קָנָה', 'קָנְתָה');
+  const caught = g(p, 'תָּפַס', 'תָּפְסָה');
   const story = Math.random() < 0.5
-    ? `${p.n} ${g(p, 'קנה', 'קנתה')} [[${a}]] ק"ג תפוחים, [[${b}]] ק"ג אגסים ו-[[${c}]] ק"ג בננות. כמה ק"ג פירות ${g(p, 'קנה', 'קנתה')} ${p.n}?`
-    : `בבוקר ${g(p, 'תפס', 'תפסה')} ${p.n} [[${a}]] פוקימונים, בצהריים [[${b}]] ובערב [[${c}]]. כמה פוקימונים ${g(p, 'תפס', 'תפסה')} ${p.n} ביום הזה?`;
+    ? `${p.n} ${bought} [[${a}]] ק"ג תַּפּוּחִים, [[${b}]] ק"ג אַגָּסִים וְ-[[${c}]] ק"ג בָּנָנוֹת. כַּמָּה ק"ג פֵּרוֹת ${bought} ${p.n}?`
+    : `בַּבֹּקֶר ${caught} ${p.n} [[${a}]] פּוֹקִימוֹנִים, בַּצָּהֳרַיִם [[${b}]] וּבָעֶרֶב [[${c}]]. כַּמָּה פּוֹקִימוֹנִים ${caught} ${p.n} בַּיּוֹם הַזֶּה?`;
   return Q({
-    type: 'word_collect', topic: 'word_add', ui: 'mission', instruction: 'משימה:',
+    type: 'word_collect', topic: 'word_add', ui: 'mission', instruction: MISSION,
     story,
     answer: sum,
-    hint: 'שואלים על הכול ביחד - מחברים את כל החלקים.',
+    hint: 'שׁוֹאֲלִים עַל הַכֹּל בְּיַחַד - מְחַבְּרִים אֶת כָּל הַחֲלָקִים.',
     steps: [`${a} + ${b} = ${a + b}.`, `${a + b} + ${c} = ${sum}.`],
   });
 }
@@ -976,11 +981,11 @@ function genWordMulti(level = 1) {
   const spent = ri(3, start + got - 2);
   const left = start + got - spent;
   return Q({
-    type: 'word_multi', topic: 'word_add', ui: 'mission', instruction: 'משימה בשני שלבים:', unit: 'שקלים',
-    story: `ל${p.n} היו [[${start}]] שקלים. ${g(p, 'הוא קיבל', 'היא קיבלה')} מסבתא עוד [[${got}]] שקלים, ו${g(p, 'קנה', 'קנתה')} קלפי פוקימון ב-[[${spent}]] שקלים. כמה שקלים נשארו ל${p.n}?`,
+    type: 'word_multi', topic: 'word_add', ui: 'mission', instruction: 'מְשִׂימָה בִּשְׁנֵי שְׁלַבִּים:', unit: SHEKELS,
+    story: `לְ${p.n} הָיוּ [[${start}]] שְׁקָלִים. ${g(p, 'הוּא קִבֵּל', 'הִיא קִבְּלָה')} מִסַּבְתָּא עוֹד [[${got}]] שְׁקָלִים, וְ${g(p, 'קָנָה', 'קָנְתָה')} קְלָפֵי פּוֹקִימוֹן בְּ-[[${spent}]] שְׁקָלִים. כַּמָּה שְׁקָלִים נִשְׁאֲרוּ לְ${p.n}?`,
     answer: left,
-    hint: `קודם מחשבים כמה היו ל${p.n} אחרי המתנה, ורק אחר כך מורידים את מה ש${g(p, 'הוא קנה', 'היא קנתה')}.`,
-    steps: [`אחרי המתנה: ${start} + ${got} = ${start + got}.`, `אחרי הקנייה: ${start + got} - ${spent} = ${left}.`],
+    hint: `קֹדֶם מְחַשְּׁבִים כַּמָּה הָיוּ לְ${p.n} אַחֲרֵי הַמַּתָּנָה, וְרַק אַחַר כָּךְ מוֹרִידִים אֶת מָה שֶׁ${g(p, 'הוּא קָנָה', 'הִיא קָנְתָה')}.`,
+    steps: [`אַחֲרֵי הַמַּתָּנָה: ${start} + ${got} = ${start + got}.`, `אַחֲרֵי הַקְּנִיָּה: ${start + got} - ${spent} = ${left}.`],
   });
 }
 
@@ -988,11 +993,11 @@ function genWordSumKnown(level = 0) {
   const sum = level === 0 ? ri(8, 20) : ri(25, 100);
   const a = ri(2, sum - 2);
   return Q({
-    type: 'word_sum_known', topic: 'word_add', ui: 'mission', instruction: 'חידה:',
-    story: `סכום של שני מספרים הוא [[${sum}]]. אחד מהם הוא [[${a}]]. מהו המספר השני?`,
+    type: 'word_sum_known', topic: 'word_add', ui: 'mission', instruction: 'חִידָה:',
+    story: `הַסְּכוּם שֶׁל שְׁנֵי מִסְפָּרִים הוּא [[${sum}]]. אֶחָד מֵהֶם הוּא [[${a}]]. מָהוּ הַמִּסְפָּר הַשֵּׁנִי?`,
     answer: sum - a,
-    hint: `איזה מספר ועוד ${a} נותן ${sum}?`,
-    steps: [`${sum} - ${a} = ${sum - a}.`, `בדיקה: ${a} + ${sum - a} = ${sum} ✔`],
+    hint: `אֵיזֶה מִסְפָּר וְעוֹד ${a} נוֹתֵן ${sum}?`,
+    steps: [`${sum} - ${a} = ${sum - a}.`, `בְּדִיקָה: ${a} + ${sum - a} = ${sum} ✔`],
   });
 }
 
@@ -1016,13 +1021,13 @@ function genMoneyPay(level = 0) {
   const plan = greedyMoney(target, values);
   return Q({
     type: 'money_pay', topic: 'word_add', ui: 'money',
-    instruction: `לחצו על מטבעות ושטרות כדי לשלם בדיוק ${target} שקלים:`,
+    instruction: `לַחֲצוּ עַל מַטְבְּעוֹת וּשְׁטָרוֹת, כְּדֵי לְשַׁלֵּם בְּדִיּוּק ${target} שְׁקָלִים:`,
     values,
     target,
     answer: target,
-    answerText: `${target} שקלים, למשל: ${plan.join(' + ')}`,
-    hint: 'מתחילים מהשטר או מהמטבע הגדול ביותר שלא עובר את הסכום, ואז משלימים בקטנים.',
-    steps: [`אפשר לשלם כך: ${plan.join(' + ')} = ${target}.`, 'יש עוד דרכים נכונות - העיקר שהסכום יהיה מדויק.'],
+    answerText: `${target} שְׁקָלִים, לְמָשָׁל: ${plan.join(' + ')}`,
+    hint: 'מַתְחִילִים מֵהַשְּׁטָר אוֹ מֵהַמַּטְבֵּעַ הַגָּדוֹל בְּיוֹתֵר שֶׁלֹּא עוֹבֵר אֶת הַסְּכוּם, וְאָז מַשְׁלִימִים בַּקְּטַנִּים.',
+    steps: [`אֶפְשָׁר לְשַׁלֵּם כָּךְ: ${plan.join(' + ')} = ${target}.`, 'יֵשׁ עוֹד דְּרָכִים נְכוֹנוֹת - הָעִקָּר שֶׁהַסְּכוּם יִהְיֶה מְדֻיָּק.'],
   });
 }
 
@@ -1033,23 +1038,23 @@ function genMoneyChange(level = 0) {
   const p = pick(PEOPLE);
   if (level === 0 || Math.random() < 0.5) {
     return Q({
-      type: 'money_change', topic: 'word_add', ui: 'mission', instruction: 'בחנות:', unit: 'שקלים',
-      story: `${p.n} ${g(p, 'קנה', 'קנתה')} ממתקים ב-[[${price}]] שקלים ו${g(p, 'שילם', 'שילמה')} ב-[[${paid}]] שקלים. כמה עודף ${g(p, 'יקבל', 'תקבל')}?`,
+      type: 'money_change', topic: 'word_add', ui: 'mission', instruction: 'בַּחֲנוּת:', unit: SHEKELS,
+      story: `${p.n} ${g(p, 'קָנָה', 'קָנְתָה')} מַמְתַּקִּים בְּ-[[${price}]] שְׁקָלִים, וְ${g(p, 'שִׁלֵּם', 'שִׁלְּמָה')} בְּ-[[${paid}]] שְׁקָלִים. כַּמָּה עֹדֶף ${g(p, 'יְקַבֵּל', 'תְּקַבֵּל')}?`,
       answer: change,
-      hint: `כמה צריך להוסיף ל-${price} כדי להגיע ל-${paid}?`,
-      steps: [`${paid} - ${price} = ${change}.`, `העודף: ${change} שקלים.`],
+      hint: `כַּמָּה צָרִיךְ לְהוֹסִיף לְ-${price} כְּדֵי לְהַגִּיעַ לְ-${paid}?`,
+      steps: [`${paid} - ${price} = ${change}.`, `הָעֹדֶף: ${change} שְׁקָלִים.`],
     });
   }
   const plan = greedyMoney(change, moneyValues(level));
   return Q({
     type: 'money_change', topic: 'word_add', ui: 'money',
-    instruction: `קנו ממתקים ב-${price} שקלים ושילמו ${paid} שקלים. הרכיבו את העודף מהמטבעות והשטרות:`,
+    instruction: `קָנוּ מַמְתַּקִּים בְּ-${price} שְׁקָלִים, וְשִׁלְּמוּ ${paid} שְׁקָלִים. הַרְכִּיבוּ אֶת הָעֹדֶף מֵהַמַּטְבְּעוֹת וּמֵהַשְּׁטָרוֹת:`,
     values: moneyValues(level),
     target: change,
     answer: change,
-    answerText: `${change} שקלים, למשל: ${plan.join(' + ')}`,
-    hint: `קודם מחשבים את העודף: ${paid} פחות ${price}.`,
-    steps: [`${paid} - ${price} = ${change}.`, `אפשר להחזיר כך: ${plan.join(' + ')}.`],
+    answerText: `${change} שְׁקָלִים, לְמָשָׁל: ${plan.join(' + ')}`,
+    hint: `קֹדֶם מְחַשְּׁבִים אֶת הָעֹדֶף: ${paid} פָּחוֹת ${price}.`,
+    steps: [`${paid} - ${price} = ${change}.`, `אֶפְשָׁר לְהַחְזִיר כָּךְ: ${plan.join(' + ')}.`],
   });
 }
 
@@ -1121,97 +1126,97 @@ function P(o) {
 
 export const PROGRAM_QUESTIONS = [
   () => P({
-    type: 'prog_375_grow', topic: 'numbers', ui: 'mission', minLevel: 1, instruction: 'חידת ספרות:',
-    story: 'במספר [[375]] שינו את ספרת העשרות ל-[[8]]. בכמה גדל המספר?', answer: 10,
-    hint: 'ספרת העשרות גדלה מ-7 ל-8, כלומר בעשרת אחת.',
-    steps: ['המספר החדש הוא 385.', '385 - 375 = 10.'],
+    type: 'prog_375_grow', topic: 'numbers', ui: 'mission', minLevel: 1, instruction: 'חִידַת סְפָרוֹת:',
+    story: 'בַּמִּסְפָּר [[375]] שִׁנּוּ אֶת סִפְרַת הָעֲשָׂרוֹת לְ-[[8]]. בְּכַמָּה גָּדַל הַמִּסְפָּר?', answer: 10,
+    hint: 'סִפְרַת הָעֲשָׂרוֹת גָּדְלָה מִ-7 לְ-8, כְּלוֹמַר בַּעֲשֶׂרֶת אַחַת.',
+    steps: ['הַמִּסְפָּר הֶחָדָשׁ הוּא 385.', '385 - 375 = 10.'],
   }),
   () => P({
-    type: 'prog_375_delete', topic: 'numbers', ui: 'mission', minLevel: 2, instruction: 'חידת ספרות:',
-    story: 'במספר [[375]] מחקו את ספרת העשרות. איזה מספר התקבל?', answer: 35,
-    hint: 'ספרת העשרות היא 7. מה נשאר בלעדיה?',
-    steps: ['מוחקים את ה-7.', 'נשארות הספרות 3 ו-5, כלומר 35.'],
+    type: 'prog_375_delete', topic: 'numbers', ui: 'mission', minLevel: 2, instruction: 'חִידַת סְפָרוֹת:',
+    story: 'בַּמִּסְפָּר [[375]] מָחֲקוּ אֶת סִפְרַת הָעֲשָׂרוֹת. אֵיזֶה מִסְפָּר הִתְקַבֵּל?', answer: 35,
+    hint: 'סִפְרַת הָעֲשָׂרוֹת הִיא 7. מָה נִשְׁאָר בִּלְעָדֶיהָ?',
+    steps: ['מוֹחֲקִים אֶת הַ-7.', 'נִשְׁאָרוֹת הַסְּפָרוֹת 3 וְ-5, כְּלוֹמַר 35.'],
   }),
   () => P({
-    type: 'prog_seq_11', topic: 'numbers', ui: 'numberline_fill', instruction: 'צרו סדרה על ידי הוספת 10:',
+    type: 'prog_seq_11', topic: 'numbers', ui: 'numberline_fill', instruction: 'צְרוּ סִדְרָה עַל יְדֵי הוֹסָפַת 10:',
     stones: [{ value: 11 }, { value: 21 }, { value: 31 }, { value: 41, blank: true }, { value: 51, blank: true }],
     answer: [41, 51], answerText: '41, 51',
-    hint: 'בכל צעד מוסיפים 10: ספרת העשרות גדלה ב-1.',
+    hint: 'בְּכָל צַעַד מוֹסִיפִים 10: סִפְרַת הָעֲשָׂרוֹת גְּדֵלָה בְּ-1.',
     steps: ['31 + 10 = 41.', '41 + 10 = 51.'],
   }),
   () => P({
-    type: 'prog_between', topic: 'numbers', ui: 'choice', instruction: 'איזה מספר נמצא בין 90 ל-101?',
+    type: 'prog_between', topic: 'numbers', ui: 'choice', instruction: 'אֵיזֶה מִסְפָּר נִמְצָא בֵּין 90 לְ-101?',
     options: shuffle([opt('95', true, true), opt('89', false, true), opt('102', false, true), opt('110', false, true)]),
-    answer: '95', hint: 'צריך מספר שגדול מ-90 וגם קטן מ-101.',
-    steps: ['95 גדול מ-90.', '95 קטן מ-101.'],
+    answer: '95', hint: 'צָרִיךְ מִסְפָּר שֶׁגָּדוֹל מִ-90, וְגַם קָטָן מִ-101.',
+    steps: ['95 גָּדוֹל מִ-90.', '95 קָטָן מִ-101.'],
   }),
   () => P({
     type: 'prog_734', topic: 'even_odd', ui: 'choice', minLevel: 1,
-    instruction: 'איזה מספר זוגי אפשר לבנות מהספרות 7, 3, 4?',
+    instruction: 'אֵיזֶה מִסְפָּר זוּגִי אֶפְשָׁר לִבְנוֹת מֵהַסְּפָרוֹת 7, 3, 4?',
     options: shuffle([opt('734', true, true), opt('743', false, true), opt('473', false, true), opt('347', false, true)]),
-    answer: '734', hint: 'מספר זוגי נגמר בספרה זוגית. איזו ספרה זוגית יש כאן?',
-    steps: ['הספרה הזוגית היא 4.', '734 נגמר ב-4, ולכן הוא זוגי.'],
+    answer: '734', hint: 'מִסְפָּר זוּגִי נִגְמָר בְּסִפְרָה זוּגִית. אֵיזוֹ סִפְרָה זוּגִית יֵשׁ כָּאן?',
+    steps: ['הַסִּפְרָה הַזּוּגִית הִיא 4.', '734 נִגְמָר בְּ-4, וְלָכֵן הוּא זוּגִי.'],
   }),
   () => P({
     type: 'prog_17_12', topic: 'add_sub', expr: '17 + 12 = ?', answer: 29,
-    hint: 'קודם מוסיפים 10, ואחר כך עוד 2.', steps: ['17 + 10 = 27.', '27 + 2 = 29.'],
+    hint: 'קֹדֶם מוֹסִיפִים 10, וְאַחַר כָּךְ עוֹד 2.', steps: ['17 + 10 = 27.', '27 + 2 = 29.'],
   }),
   () => P({
     type: 'prog_26_34', topic: 'add_sub', minLevel: 1, expr: '26 + 34 = ?', answer: 60,
-    hint: 'מפרקים את 34 ל-30 ו-4.', steps: ['26 + 30 = 56.', '56 + 4 = 60.'],
+    hint: 'מְפָרְקִים אֶת 34 לְ-30 וְ-4.', steps: ['26 + 30 = 56.', '56 + 4 = 60.'],
   }),
   () => P({
     type: 'prog_70_18', topic: 'add_sub', minLevel: 1, expr: '70 - 18 = ?', answer: 52,
-    hint: 'מפרקים את 18 ל-10 ו-8.', steps: ['70 - 10 = 60.', '60 - 8 = 52.'],
+    hint: 'מְפָרְקִים אֶת 18 לְ-10 וְ-8.', steps: ['70 - 10 = 60.', '60 - 8 = 52.'],
   }),
   () => P({
     type: 'prog_85_19', topic: 'add_sub', minLevel: 2, expr: '85 - 19 = ?', answer: 66,
-    hint: '19 זה כמעט 20. אפשר להוריד 20 ולהחזיר 1.', steps: ['85 - 20 = 65.', 'הורדנו 1 יותר מדי, מחזירים: 65 + 1 = 66.'],
+    hint: '19 זֶה כִּמְעַט 20. אֶפְשָׁר לְהוֹרִיד 20 וּלְהַחְזִיר 1.', steps: ['85 - 20 = 65.', 'הוֹרַדְנוּ 1 יוֹתֵר מִדַּי, וּמַחְזִירִים: 65 + 1 = 66.'],
   }),
   () => P({
     type: 'prog_240_35', topic: 'add_sub', minLevel: 2, expr: '240 + 35 = ?', answer: 275,
-    hint: 'עשרות עם עשרות, יחידות עם יחידות.', steps: ['240 + 30 = 270.', '270 + 5 = 275.'],
+    hint: 'עֲשָׂרוֹת עִם עֲשָׂרוֹת, יְחִידוֹת עִם יְחִידוֹת.', steps: ['240 + 30 = 270.', '270 + 5 = 275.'],
   }),
   () => P({
     type: 'prog_36_14', topic: 'missing', ui: 'choice', noShuffle: true, minLevel: 1,
-    instruction: 'ידוע ש-36 + 14 = 50. האם נכון ש-14 + 37 = 51?',
-    options: [opt('כן, נכון', true), opt('לא נכון', false)],
-    answer: 'כן, נכון', hint: '37 גדול ב-1 מ-36. מה קורה לתוצאה?',
-    steps: ['14 + 36 = 50.', '37 הוא אחד יותר מ-36, ולכן התוצאה גדלה ב-1: 51.'],
+    instruction: 'יָדוּעַ שֶׁ-36 + 14 = 50. הַאִם נָכוֹן שֶׁ-14 + 37 = 51?',
+    options: [opt('כֵּן, נָכוֹן', true), opt('לֹא נָכוֹן', false)],
+    answer: 'כֵּן, נָכוֹן', hint: '37 גָּדוֹל בְּ-1 מִ-36. מָה קוֹרֶה לַתּוֹצָאָה?',
+    steps: ['14 + 36 = 50.', '37 הוּא אֶחָד יוֹתֵר מִ-36, וְלָכֵן הַתּוֹצָאָה גְּדֵלָה בְּ-1: 51.'],
   }),
   () => P({
     type: 'prog_70_50', topic: 'insight', ui: 'choice', noShuffle: true,
-    instruction: 'האם התוצאה גדולה מ-100, קטנה מ-100 או שווה ל-100?', expr: '70 + 50',
-    options: [opt('גדול מ-100', true), opt('שווה ל-100'), opt('קטן מ-100')],
-    answer: 'גדול מ-100', hint: '50 ועוד 50 זה 100. ו-70 גדול מ-50.',
-    steps: ['70 + 50 = 120.', '120 גדול מ-100.'],
+    instruction: 'הַאִם הַתּוֹצָאָה גְּדוֹלָה מִ-100, קְטַנָּה מִ-100 אוֹ שָׁוָה לְ-100?', expr: '70 + 50',
+    options: [opt(BIG, true), opt(SAME), opt(SMALL)],
+    answer: BIG, hint: '50 וְעוֹד 50 זֶה 100. וְ-70 גָּדוֹל מִ-50.',
+    steps: ['70 + 50 = 120.', '120 גָּדוֹל מִ-100.'],
   }),
   () => P({
     type: 'prog_107', topic: 'insight', ui: 'choice', noShuffle: true, minLevel: 1,
-    instruction: 'בלי לפתור: באיזה תרגיל התוצאה גדולה יותר?',
-    options: [opt('107 - 13', true, true), opt('107 - 15', false, true), opt('התוצאות שוות')],
-    answer: '107 - 13', hint: 'בשניהם מתחילים מ-107. מי מוריד פחות?',
-    steps: ['מי שמוריד פחות - נשאר לו יותר.', '13 קטן מ-15, ולכן 107 - 13 גדול יותר.'],
+    instruction: 'בְּלִי לִפְתֹּר: בְּאֵיזֶה תַּרְגִּיל הַתּוֹצָאָה גְּדוֹלָה יוֹתֵר?',
+    options: [opt('107 - 13', true, true), opt('107 - 15', false, true), opt(EQUAL_RESULTS)],
+    answer: '107 - 13', hint: 'בִּשְׁנֵיהֶם מַתְחִילִים מִ-107. מִי מוֹרִיד פָּחוֹת?',
+    steps: ['מִי שֶׁמּוֹרִיד פָּחוֹת - נִשְׁאָר לוֹ יוֹתֵר.', '13 קָטָן מִ-15, וְלָכֵן בַּתַּרְגִּיל 107 - 13 הַתּוֹצָאָה גְּדוֹלָה יוֹתֵר.'],
   }),
   () => P({
-    type: 'prog_dani', topic: 'word_add', ui: 'mission', instruction: 'משימה:', unit: 'שקלים',
-    story: 'לדני [[7]] שקלים. ליוסי [[3]] שקלים יותר. כמה שקלים יש ליוסי?', answer: 10,
-    hint: 'ליוסי יש כמו לדני, ועוד 3.', steps: ['7 + 3 = 10.'],
+    type: 'prog_dani', topic: 'word_add', ui: 'mission', instruction: MISSION, unit: SHEKELS,
+    story: 'לְדָנִי יֵשׁ [[7]] שְׁקָלִים. לְיוֹסִי יֵשׁ [[3]] שְׁקָלִים יוֹתֵר. כַּמָּה שְׁקָלִים יֵשׁ לְיוֹסִי?', answer: 10,
+    hint: 'לְיוֹסִי יֵשׁ כְּמוֹ לְדָנִי, וְעוֹד 3.', steps: ['7 + 3 = 10.'],
   }),
   () => P({
-    type: 'prog_fruit', topic: 'word_add', ui: 'mission', instruction: 'משימה:',
-    story: 'אמא קנתה [[3]] ק"ג תפוחים, [[5]] ק"ג אגסים ו-[[4]] ק"ג בננות. כמה ק"ג פירות קנתה?', answer: 12,
-    hint: 'מחברים את כל הפירות.', steps: ['3 + 5 = 8.', '8 + 4 = 12.'],
+    type: 'prog_fruit', topic: 'word_add', ui: 'mission', instruction: MISSION,
+    story: 'אִמָּא קָנְתָה [[3]] ק"ג תַּפּוּחִים, [[5]] ק"ג אַגָּסִים וְ-[[4]] ק"ג בָּנָנוֹת. כַּמָּה ק"ג פֵּרוֹת הִיא קָנְתָה?', answer: 12,
+    hint: 'מְחַבְּרִים אֶת כָּל הַפֵּרוֹת.', steps: ['3 + 5 = 8.', '8 + 4 = 12.'],
   }),
   () => P({
-    type: 'prog_oded', topic: 'word_add', ui: 'mission', minLevel: 1, instruction: 'משימה בשני שלבים:', unit: 'שקלים',
-    story: 'לעודד היו [[15]] שקלים. הוא קיבל מאביו עוד [[20]] שקלים וקנה ממתקים ב-[[8]] שקלים. כמה שקלים נשארו לו?', answer: 27,
-    hint: 'קודם מחשבים כמה היו לו אחרי המתנה.', steps: ['15 + 20 = 35.', '35 - 8 = 27.'],
+    type: 'prog_oded', topic: 'word_add', ui: 'mission', minLevel: 1, instruction: 'מְשִׂימָה בִּשְׁנֵי שְׁלַבִּים:', unit: SHEKELS,
+    story: 'לְעוֹדֵד הָיוּ [[15]] שְׁקָלִים. הוּא קִבֵּל מֵאָבִיו עוֹד [[20]] שְׁקָלִים, וְקָנָה מַמְתַּקִּים בְּ-[[8]] שְׁקָלִים. כַּמָּה שְׁקָלִים נִשְׁאֲרוּ לוֹ?', answer: 27,
+    hint: 'קֹדֶם מְחַשְּׁבִים כַּמָּה הָיוּ לוֹ אַחֲרֵי הַמַּתָּנָה.', steps: ['15 + 20 = 35.', '35 - 8 = 27.'],
   }),
   () => P({
-    type: 'prog_sum40', topic: 'word_add', ui: 'mission', instruction: 'חידה:',
-    story: 'סכום של שני מספרים הוא [[40]]. אחד מהם הוא [[22]]. מהו המספר השני?', answer: 18,
-    hint: 'איזה מספר ועוד 22 נותן 40?', steps: ['40 - 22 = 18.', 'בדיקה: 22 + 18 = 40 ✔'],
+    type: 'prog_sum40', topic: 'word_add', ui: 'mission', instruction: 'חִידָה:',
+    story: 'הַסְּכוּם שֶׁל שְׁנֵי מִסְפָּרִים הוּא [[40]]. אֶחָד מֵהֶם הוּא [[22]]. מָהוּ הַמִּסְפָּר הַשֵּׁנִי?', answer: 18,
+    hint: 'אֵיזֶה מִסְפָּר וְעוֹד 22 נוֹתֵן 40?', steps: ['40 - 22 = 18.', 'בְּדִיקָה: 22 + 18 = 40 ✔'],
   }),
 ];
 

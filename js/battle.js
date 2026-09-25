@@ -52,21 +52,23 @@ function hintHtml(q) {
 
 /* ============================ הקראה ============================ */
 
-/** הנוסח המדובר של השאלה */
+/**
+ * מה מקריאים: רק את ההוראה, ובשאלות מילוליות גם את הסיפור.
+ * את התרגיל והמספרים עצמם לא מקריאים - אותם הילד/ה קורא/ת לבד.
+ */
 export function speechFor(q) {
   if (q.speech) return q.speech;
   const parts = [q.instruction];
-  if (q.given) parts.push(`ידוע ש ${q.given}`);
-  if (q.story) parts.push(q.story);
-  if (q.expr) parts.push(q.expr);
-  if (q.ui === 'choice' && q.options.every((o) => !/[<>=]/.test(o.text)) && q.options.length > 2) {
-    parts.push(`האפשרויות: ${q.options.map((o) => o.text).join(', ')}`);
-  }
+  if (q.ui === 'mission' && q.story) parts.push(q.story);
   return parts.filter(Boolean).map(speakMath).join('. ');
 }
 
 function readQuestion() {
   if (!battle) return;
+  if (!hasHebrewVoice()) {
+    toast('בַּמַּכְשִׁיר הַזֶּה אֵין קוֹל עִבְרִי לְהַקְרָאָה 🔇');
+    return;
+  }
   speak(speechFor(battle.questions[battle.index]));
 }
 
@@ -94,10 +96,10 @@ function renderQuestion() {
 
   const topicName = TOPICS[q.topic] ? TOPICS[q.topic].name : '';
   const tags = [
-    `שאלה ${battle.index + 1} מתוך ${battle.questions.length}`,
+    `שְׁאֵלָה ${battle.index + 1} מִתּוֹךְ ${battle.questions.length}`,
     topicName,
-    q.source === 'program' ? 'מתוך התכנית' : '',
-    q.fromReview ? 'חזרה 🔁' : '',
+    q.source === 'program' ? 'מִתּוֹךְ הַתָּכְנִית' : '',
+    q.fromReview ? 'חֲזָרָה 🔁' : '',
   ].filter(Boolean);
   $('#q-topic').textContent = tags.join(' · ');
   $('#btn-read-q').hidden = !canSpeak();
@@ -115,10 +117,6 @@ function renderQuestion() {
   $('#btn-hint').disabled = false;
 
   renderPips();
-
-  if (getState().settings.autoRead && hasHebrewVoice()) {
-    setTimeout(() => { if (battle && battle.questions[battle.index] === q) readQuestion(); }, 350);
-  }
 }
 
 function renderPips() {
@@ -163,9 +161,9 @@ function setHp(hp) {
 
 /* ============================ פסק דין ============================ */
 
-const PRAISE_FIRST = ['מצוין!', 'כל הכבוד!', 'בול!', 'אלוף!', 'מדויק!', 'פגיעה ישירה!'];
-const PRAISE_SECOND = ['יפה מאוד, הצלחת!', 'כל הכבוד על ההתמדה!', 'זהו, תפסת את זה!'];
-const ENCOURAGE = ['כמעט! ננסה שוב עם רמז.', 'לא נורא בכלל - יש עוד ניסיון.', 'זה קורה לכולם. הנה רמז קטן.'];
+const PRAISE_FIRST = ['מְצֻיָּן!', 'כָּל הַכָּבוֹד!', 'בּוּל!', 'אַלּוּפִים!', 'מְדֻיָּק!', 'פְּגִיעָה יְשִׁירָה!'];
+const PRAISE_SECOND = ['יָפֶה מְאוֹד, הִצְלַחְתֶּם!', 'כָּל הַכָּבוֹד עַל הַהַתְמָדָה!', 'זְהוּ, תְּפַסְתֶּם אֶת זֶה!'];
+const ENCOURAGE = ['כִּמְעַט! נְנַסֶּה שׁוּב עִם רֶמֶז.', 'לֹא נוֹרָא בִּכְלָל - יֵשׁ עוֹד נִסָּיוֹן.', 'זֶה קוֹרֶה לְכֻלָּם. הִנֵּה רֶמֶז קָטָן.'];
 
 function pickOf(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -174,13 +172,13 @@ function handleVerdict(v) {
   const q = battle.questions[battle.index];
 
   if (v.status === 'incomplete') {
-    toast(v.message || 'עוד לא סיימנו כאן 🙂');
+    toast(v.message || 'עוֹד לֹא סִיַּמְנוּ כָּאן 🙂');
     return;
   }
 
   // התקדמות בתוך השאלה (אבן נוספת וכדומה)
   if (v.status === 'progress') {
-    showFeedback('good', v.message || 'יופי!', '');
+    showFeedback('good', v.message || 'יֹפִי!', '');
     return;
   }
 
@@ -208,7 +206,6 @@ function handleVerdict(v) {
     if (pxp) {
       battle.partnerXp += xp;
       if (pxp.leveledUp) battle.partnerLevel = pxp.levelAfter;
-      if (pxp.becameReady) battle.partnerReady = true;
     }
     recordAnswer(q.topic, outcome);
     battle.topics.add(q.topic);
@@ -217,10 +214,10 @@ function handleVerdict(v) {
     updateHUD();
 
     const praise = outcome === 'first' ? pickOf(PRAISE_FIRST) : pickOf(PRAISE_SECOND);
-    const extra = bonus ? ` (כולל בונוס של ${fmt(bonus)})` : '';
+    const extra = bonus ? ` (כּוֹלֵל בּוֹנוּס שֶׁל ${fmt(bonus)})` : '';
     showFeedback('good', `${praise} 🎉`, `
       ${v.message ? `<div>${esc(v.message)}</div>` : ''}
-      <div>קיבלת <span class="num">${fmt(coins)}</span> פוקדולרים${esc(extra)}.</div>`);
+      <div>קִבַּלְתֶּם <span class="num">${fmt(coins)}</span> פּוֹקָדוֹלָרִים${esc(extra)}.</div>`);
     endOfQuestion();
     return;
   }
@@ -231,7 +228,7 @@ function handleVerdict(v) {
 
   if (battle.errors === 1) {
     showFeedback('hint', v.message || pickOf(ENCOURAGE),
-      `${hintHtml(q)}<div class="fb-extra">נסו שוב - טעות לא עולה פוקדולרים.</div>`);
+      `${hintHtml(q)}<div class="fb-extra">נַסּוּ שׁוּב - טָעוּת לֹא עוֹלָה פּוֹקָדוֹלָרִים.</div>`);
     battle.hintShown = true;
     $('#btn-hint').disabled = true;
     return;
@@ -247,8 +244,8 @@ function handleVerdict(v) {
   updateHUD();
 
   const answerText = q.answerText || (typeof q.answer === 'number' ? fmt(q.answer) : String(q.answer));
-  showFeedback('solve', 'בואו נפתור את זה יחד, שלב אחר שלב:',
-    `${stepsHtml(q.steps)}<div class="fb-extra">התשובה הנכונה: <span class="mathrun" dir="ltr">${esc(answerText)}</span>. השאלה הזו תחזור בקרב הבא כדי להתאמן עליה שוב. 💪</div>`);
+  showFeedback('solve', 'בּוֹאוּ נִפְתֹּר אֶת זֶה יַחַד, שָׁלָב אַחַר שָׁלָב:',
+    `${stepsHtml(q.steps)}<div class="fb-extra">הַתְּשׁוּבָה הַנְּכוֹנָה: <span class="mathrun" dir="ltr">${esc(answerText)}</span>. הַשְּׁאֵלָה הַזֹּאת תַּחֲזֹר בַּקְּרָב הַבָּא, כְּדֵי לְהִתְאַמֵּן עָלֶיהָ שׁוּב. 💪</div>`);
   endOfQuestion();
 }
 
@@ -258,7 +255,7 @@ function endOfQuestion() {
   renderPips();
   $('#btn-submit').hidden = true;
   $('#btn-next').hidden = false;
-  $('#btn-next').textContent = battle.index === battle.questions.length - 1 ? 'לתפוס את הפוקימון! ←' : 'המשך ←';
+  $('#btn-next').textContent = battle.index === battle.questions.length - 1 ? 'לִתְפֹּס אֶת הַפּוֹקִימוֹן! ←' : 'הַמְשֵׁךְ ←';
   $('#btn-hint').disabled = true;
   $('#btn-next').focus();
 }
@@ -273,7 +270,7 @@ function onHint() {
   const s = getState();
   if (battle.hintShown) return;
   if (s.player.coins < REWARDS.hintCost) {
-    toast('אין מספיק פוקדולרים לרמז. נסו לפתור - גם טעות לא עולה כלום!');
+    toast('אֵין מַסְפִּיק פּוֹקָדוֹלָרִים לְרֶמֶז. נַסּוּ לִפְתֹּר - גַּם טָעוּת לֹא עוֹלָה כְּלוּם!');
     return;
   }
   addCoins(-REWARDS.hintCost);
@@ -281,7 +278,7 @@ function onHint() {
   battle.hintShown = true;
   updateHUD();
   $('#btn-hint').disabled = true;
-  showFeedback('hint', 'רמז:', hintHtml(q));
+  showFeedback('hint', 'רֶמֶז:', hintHtml(q));
 }
 
 function onNext() {
@@ -344,24 +341,24 @@ function renderCatch(stage = 'ready', result = null) {
         <button class="ball-choice ${battle.ball === b.id ? 'chosen' : ''}" type="button" data-ball="${b.id}" ${disabled ? 'disabled' : ''}>
           ${ballSvg(b.id)}
           <span>${esc(b.name)}</span>
-          <span class="small-note">${count === Infinity ? 'בלי הגבלה' : `יש לך ${fmt(count)}`}</span>
+          <span class="small-note">${count === Infinity ? 'בְּלִי הַגְבָּלָה' : `יֵשׁ לָכֶם ${fmt(count)}`}</span>
         </button>`;
     }).join('');
     const chosenPct = Math.round(chanceOf(battle.ball) * 100);
     body = `
-      <div class="catch-title">${fainted ? `${esc(name)} הבר התעלף!` : `${esc(name)} הבר נחלש!`}</div>
+      <div class="catch-title">${esc(name)} הַבָּר ${fainted ? 'הִתְעַלֵּף!' : 'נֶחֱלַשׁ!'}</div>
       <div class="catch-stage">
         <div class="catch-wild ${fainted ? 'fainted' : ''}">${pokemonImg(wild, { cls: 'pk-xl' })}</div>
       </div>
       <div class="catch-meter">
-        <div class="small-note">סיכוי לתפוס</div>
+        <div class="small-note">סִכּוּי לִתְפֹּס</div>
         <div class="meter"><div class="meter-fill" style="width:${chosenPct}%"></div></div>
         ${chosenPct >= 100
-    ? '<div class="meter-note">בטוח תופסים! ✨</div>'
-    : '<div class="small-note">ככל שעונים נכון יותר בקרב - קל יותר לתפוס. סופרדור עוזר!</div>'}
+    ? '<div class="meter-note">בֶּטַח תּוֹפְסִים! ✨</div>'
+    : '<div class="small-note">כְּכָל שֶׁעוֹנִים נָכוֹן יוֹתֵר בַּקְּרָב - קַל יוֹתֵר לִתְפֹּס. סוּפֶּרְדוֹר עוֹזֵר!</div>'}
       </div>
       <div class="ball-row">${balls}</div>
-      <button class="btn btn-primary btn-xl" type="button" id="btn-throw">זורקים ${esc(BALLS[battle.ball].name)}!</button>`;
+      <button class="btn btn-primary btn-xl" type="button" id="btn-throw">זוֹרְקִים ${esc(BALLS[battle.ball].name)}!</button>`;
   } else if (stage === 'throwing') {
     body = `
       <div class="catch-title">...</div>
@@ -372,18 +369,18 @@ function renderCatch(stage = 'ready', result = null) {
   } else {
     const caught = result.caught;
     let text;
-    if (!caught) text = `אוי! ${esc(name)} ברח... בפעם הבאה נתפוס! 💨`;
-    else if (result.duplicate) text = `נתפס! כבר יש לך ${esc(name)}, אז הוא הפך לממתק: +${fmt(CANDY_XP)} ניסיון ל${esc(nameOf(partner().species))} 🍬`;
-    else text = `נתפס! <strong>${esc(name)}</strong> הצטרף לאוסף שלך! ${result.isNew ? '(חדש בפוקידקס!)' : ''}`;
+    if (!caught) text = `אוֹי! ${esc(name)} בָּרַח... בַּפַּעַם הַבָּאָה נִתְפֹּס! 💨`;
+    else if (result.duplicate) text = `נִתְפַּס! כְּבָר יֵשׁ לָכֶם ${esc(name)}, אָז הוּא הָפַךְ לְמַמְתָּק: +${fmt(CANDY_XP)} נִסָּיוֹן לְ${esc(nameOf(partner().species))} 🍬`;
+    else text = `נִתְפַּס! <strong>${esc(name)}</strong> הִצְטָרֵף לָאֹסֶף שֶׁלָּכֶם! ${result.isNew ? '(חָדָשׁ בַּפּוֹקִידֶקְס!)' : ''}`;
     body = `
-      <div class="catch-title">${caught ? 'יש!!! 🎉' : 'כמעט...'}</div>
+      <div class="catch-title">${caught ? 'יֵשׁ!!! 🎉' : 'כִּמְעַט...'}</div>
       <div class="catch-stage">
         ${caught
     ? `<div class="thrown-ball caught">${ballSvg(battle.ball)}<span class="stars">✨</span></div>`
     : `<div class="catch-wild escaped">${pokemonImg(wild, { cls: 'pk-xl' })}</div>`}
       </div>
       <div class="catch-text">${text}</div>
-      <button class="btn btn-primary btn-xl" type="button" id="btn-catch-next">לסיכום הקרב ←</button>`;
+      <button class="btn btn-primary btn-xl" type="button" id="btn-catch-next">לְסִכּוּם הַקְּרָב ←</button>`;
   }
 
   $('#catch-body').innerHTML = body;
@@ -403,7 +400,6 @@ function renderCatch(stage = 'ready', result = null) {
         if (res.candy) {
           battle.partnerXp += CANDY_XP;
           if (res.candy.leveledUp) battle.partnerLevel = res.candy.levelAfter;
-          if (res.candy.becameReady) battle.partnerReady = true;
         }
         renderCatch('done', res);
       }, 2300);
@@ -419,47 +415,48 @@ function showSummary() {
   const s = getState();
   const total = battle.questions.length;
   const firstTry = battle.results.filter((r) => r === 'first').length;
-  const days = battle.streakInfo.streak === 1 ? 'יום אחד' : `${fmt(battle.streakInfo.streak)} ימים`;
+  const days = battle.streakInfo.streak === 1 ? 'יוֹם אֶחָד' : `${fmt(battle.streakInfo.streak)} יָמִים`;
   const value = (v) => (/[֐-׿]/.test(v) ? `<span>${esc(v)}</span>` : `<span class="num">${esc(v)}</span>`);
   const p = partner();
+  const pName = nameOf(p.species);
   const res = battle.catchResult || { caught: false };
 
-  $('#summary-title').textContent = res.caught ? 'ניצחון ותפיסה! 🏆' : 'סוף הקרב';
+  $('#summary-title').textContent = res.caught ? 'נִצָּחוֹן וּתְפִיסָה! 🏆' : 'סוֹף הַקְּרָב';
   $('#summary-art').innerHTML = res.caught && !res.duplicate
     ? pokemonImg(battle.wildId, { cls: 'pk-lg' })
     : pokemonImg(p.species, { cls: 'pk-lg' });
   $('#summary-art').classList.toggle('victory-pop', Boolean(res.caught));
 
   const rows = [
-    ['תשובות נכונות', `${fmt(battle.correct)} מתוך ${fmt(total)}`],
-    ['נכון בניסיון ראשון', `${fmt(firstTry)}`],
-    ['פוקדולרים מהקרב', `₽ ${fmt(battle.coins)}`],
-    [`ניסיון ל${nameOf(p.species)}`, `+${fmt(battle.partnerXp)}`],
+    ['תְּשׁוּבוֹת נְכוֹנוֹת', `${fmt(battle.correct)} מִתּוֹךְ ${fmt(total)}`],
+    ['נָכוֹן בַּנִּסָּיוֹן הָרִאשׁוֹן', `${fmt(firstTry)}`],
+    ['פּוֹקָדוֹלָרִים מֵהַקְּרָב', `₽ ${fmt(battle.coins)}`],
+    [`נִסָּיוֹן לְ${pName}`, `+${fmt(battle.partnerXp)}`],
   ];
-  if (battle.hintsBought > 0) rows.push(['רמזים שנקנו', `₽ -${fmt(battle.hintsBought * REWARDS.hintCost)}`]);
+  if (battle.hintsBought > 0) rows.push(['רְמָזִים שֶׁנִּקְנוּ', `₽ -${fmt(battle.hintsBought * REWARDS.hintCost)}`]);
 
   const bonusRows = [];
-  if (battle.perfect) bonusRows.push([`בונוס קרב מושלם! ${fmt(total)} מתוך ${fmt(total)}`, `₽ +${fmt(REWARDS.perfectBonus)}`]);
-  if (battle.streakBonus > 0) bonusRows.push([`בונוס רצף אימונים - ${days}`, `₽ +${fmt(battle.streakBonus)}`]);
-  for (const t of battle.badges) bonusRows.push([`🏅 תג חדש: ${TOPICS[t].gym}`, `₽ +${fmt(REWARDS.badgeBonus)}`]);
-  if (battle.partnerLevel) bonusRows.push([`${nameOf(p.species)} עלה לרמה ${fmt(battle.partnerLevel)}!`, '⬆️']);
+  if (battle.perfect) bonusRows.push([`בּוֹנוּס קְרָב מֻשְׁלָם! ${fmt(total)} מִתּוֹךְ ${fmt(total)}`, `₽ +${fmt(REWARDS.perfectBonus)}`]);
+  if (battle.streakBonus > 0) bonusRows.push([`בּוֹנוּס רֶצֶף אִימוּנִים - ${days}`, `₽ +${fmt(battle.streakBonus)}`]);
+  for (const t of battle.badges) bonusRows.push([`🏅 תָּג חָדָשׁ: ${TOPICS[t].gym}`, `₽ +${fmt(REWARDS.badgeBonus)}`]);
+  if (battle.partnerLevel) bonusRows.push([`${pName} עָלָה לְרָמָה ${fmt(battle.partnerLevel)}!`, '⬆️']);
 
   $('#summary-list').innerHTML = [
     ...rows.map(([k, v]) => `<li><span>${esc(k)}</span>${value(v)}</li>`),
     ...bonusRows.map(([k, v]) => `<li class="bonus"><span>${esc(k)}</span>${value(v)}</li>`),
-    `<li><span>סך הפוקדולרים שלך</span><span class="num">₽ ${fmt(s.player.coins)}</span></li>`,
+    `<li><span>סַךְ הַפּוֹקָדוֹלָרִים שֶׁלָּכֶם</span><span class="num">₽ ${fmt(s.player.coins)}</span></li>`,
   ].join('');
 
   const ready = canEvolve(p.uid);
   $('#summary-evolve').hidden = !ready;
-  if (ready) $('#summary-evolve').innerHTML = `✨ ${esc(nameOf(p.species))} מוכן להתפתח! היכנסו לפוקידקס.`;
+  if (ready) $('#summary-evolve').innerHTML = `✨ ${esc(pName)} מוּכָן לְהִתְפַּתֵּחַ! הִכָּנְסוּ לַפּוֹקִידֶקְס.`;
   $('#btn-summary-dex').classList.toggle('btn-glow', ready);
 
   showScreen('summary');
 
   const celebrations = [];
-  if (battle.badges.length) celebrations.push([`קיבלת את ${TOPICS[battle.badges[0]].gym}!`, '🏅']);
-  if (battle.levelUps.length) celebrations.push([`עלית לדרגת ${battle.levelUps[battle.levelUps.length - 1]}!`, '⭐']);
+  if (battle.badges.length) celebrations.push([`קִבַּלְתֶּם אֶת הַתָּג שֶׁל ${TOPICS[battle.badges[0]].gym}!`, '🏅']);
+  if (battle.levelUps.length) celebrations.push([`עֲלִיתֶם לְדַרְגַּת ${battle.levelUps[battle.levelUps.length - 1]}!`, '⭐']);
   celebrations.forEach(([text, icon], i) => setTimeout(() => celebrateLevelUp(text, icon), 400 + i * 2600));
 
   battle = null;
@@ -488,7 +485,6 @@ export function startBattle(options = {}) {
     xp: 0,
     partnerXp: 0,
     partnerLevel: 0,
-    partnerReady: false,
     levelUps: [],
     topics: new Set(),
     component: null,
@@ -497,20 +493,20 @@ export function startBattle(options = {}) {
     streakInfo: touchDailyStreak(),
   };
 
-  $('#wild-name').innerHTML = `${esc(nameOf(wildId))} <span class="wild-tag">פוקימון בר</span>`;
+  $('#wild-name').innerHTML = `${esc(nameOf(wildId))} <span class="wild-tag">פּוֹקִימוֹן בַּר</span>`;
   $('#wild-art').className = 'wild-art';
   $('#wild-art').innerHTML = pokemonImg(wildId, { cls: 'pk-lg' });
   setHp(battle.hp);
 
   $('#battle-partner').innerHTML = `${pokemonImg(p.species, { cls: 'pk-md flip' })}
-    <div class="partner-label">${esc(nameOf(p.species))} · רמה <span class="num">${fmt(levelOf(p.xp))}</span></div>`;
+    <div class="partner-label">${esc(nameOf(p.species))} · רָמָה <span class="num">${fmt(levelOf(p.xp))}</span></div>`;
 
   showScreen('battle');
-  $('#topbar-title').textContent = topic && TOPICS[topic] ? TOPICS[topic].gym : 'קרב פראי';
+  $('#topbar-title').textContent = topic && TOPICS[topic] ? TOPICS[topic].gym : 'קְרָב פְּרָאִי';
   renderQuestion();
 
   if (battle.streakInfo.isNewDay && battle.streakInfo.streak > 1) {
-    toast(`🔥 רצף של ${battle.streakInfo.streak} ימים! בונוס בסוף הקרב.`);
+    toast(`🔥 רֶצֶף שֶׁל ${battle.streakInfo.streak} יָמִים! בּוֹנוּס בְּסוֹף הַקְּרָב.`);
   }
 }
 

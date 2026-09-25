@@ -5,7 +5,7 @@ import {
   GENERATORS, PROGRAM_QUESTIONS, buildBattle, TOPICS, REGION_ORDER, makeByType, greedyMoney, openTopics,
 } from '../js/questions.js';
 import { SUPPORTED_UIS } from '../js/qui.js';
-import { fmt, parseNum, wrapMath, esc, speakMath } from '../js/util.js';
+import { fmt, parseNum, wrapMath, esc, speakMath, stripNiqqud } from '../js/util.js';
 import { defaultSave } from '../js/storage.js';
 
 let pass = 0;
@@ -27,6 +27,8 @@ function checkOnce(name, cond, detail = '') {
 /* ---------- עזרים ---------- */
 
 const n = (s) => Number(String(s).replace(/,/g, ''));
+/** טקסט בלי ניקוד - כדי להשוות מילים */
+const S = (s) => stripNiqqud(String(s ?? ''));
 
 /** חישוב שרשרת חיבור וחיסור משמאל לימין: "12 + 5 - 3" */
 function evalChain(text) {
@@ -62,6 +64,8 @@ check('speakMath: חיסור עם חסר', speakMath('35 - ? = 30') === '35 פח
 check('speakMath: שאלה בעברית נשארת', speakMath('כמה שקלים יש ליוסי?') === 'כמה שקלים יש ליוסי?', speakMath('כמה שקלים יש ליוסי?'));
 check('speakMath: מקף בעברית נשאר', speakMath('הגדול ב-10 מ-84') === 'הגדול ב-10 מ-84', speakMath('הגדול ב-10 מ-84'));
 check('speakMath: ק"ג', speakMath('[[3]] ק"ג תפוחים').includes('3 קילוגרם'));
+check('speakMath: מסיר ניקוד', speakMath('פִּתְרוּ אֶת הַתַּרְגִּיל:') === 'פתרו את התרגיל:');
+check('הסרת ניקוד', stripNiqqud('שָׁלוֹם') === 'שלום');
 check('wrapMath: תרגיל בתוך משפט נעטף', wrapMath(esc('בדיקה: 5 + 8 = 13.')).includes('>5 + 8 = 13<'));
 check('בדיקת העזר: תרגיל שגוי מזוהה', wrongEquations('3 + 4 = 8').length === 1 && wrongEquations('3 + 4 + 5 = 12').length === 0);
 
@@ -69,11 +73,18 @@ check('בדיקת העזר: תרגיל שגוי מזוהה', wrongEquations('3 +
 
 const RUNS = 200;
 
-function validateQuestion(q, label) {
+function validateQuestion(q0, label) {
+  let q = q0;
   checkOnce(`${label}: יש סוג ונושא מוכר`, Boolean(q.type) && Boolean(TOPICS[q.topic]), `${q.type}/${q.topic}`);
   checkOnce(`${label}: רכיב ממשק קיים`, SUPPORTED_UIS.includes(q.ui), q.ui);
   checkOnce(`${label}: יש רמז`, typeof q.hint === 'string' && q.hint.length > 5);
   checkOnce(`${label}: יש פתרון בשלבים`, Array.isArray(q.steps) && q.steps.length > 0 && q.steps.every((s) => typeof s === 'string' && s.length));
+
+  // כל טקסט בעברית שהילד/ה קורא/ת - מנוקד
+  const hebrewTexts = [q.instruction, q.story, q.hint, q.unit, ...(q.steps || []),
+    ...(q.exprRtl ? [q.expr] : []), ...(q.options || []).map((o) => o.text)];
+  const unvoweled = hebrewTexts.filter((t) => /[א-ת]{2}/.test(t || '') && !/[֑-ׇ]/.test(t));
+  checkOnce(`${label}: כל הטקסט מנוקד`, unvoweled.length === 0, unvoweled.join(' | '));
 
   const allText = [q.instruction, q.expr, q.story, q.given, q.hint, ...(q.steps || [])].join(' ');
   const bad = wrongEquations([q.given, q.hint, ...(q.steps || [])].join(' | '));
@@ -128,7 +139,8 @@ function validateQuestion(q, label) {
     checkOnce(`${label}: כל המספרים בין 0 ל-1,000`, vals.every((v) => v >= 0 && v <= 1000), vals.join(','));
   }
 
-  // בדיקות עצמאיות לפי סוג
+  // בדיקות עצמאיות לפי סוג (על טקסט בלי ניקוד)
+  q = { ...q, instruction: S(q.instruction), story: S(q.story), expr: S(q.expr), answer: typeof q.answer === 'string' ? S(q.answer) : q.answer };
   switch (q.type) {
     case 'pv_digit': {
       if (q.instruction.includes('הערך')) {
@@ -217,7 +229,7 @@ function validateQuestion(q, label) {
     }
     case 'estimate': {
       const v = evalChain(q.expr);
-      const exp = v > 100 ? 'גדול מ-100' : v < 100 ? 'קטן מ-100' : 'שווה ל-100';
+      const exp = v > 100 ? 'גדול מ-100' : v < 100 ? 'קטן מ-100' : 'שוה ל-100';
       checkOnce(`${label}: אומדן`, q.answer === exp, `${q.expr}=${v} -> ${q.answer}`);
       break;
     }
