@@ -59,7 +59,7 @@ function hintHtml(q) {
 export function speechFor(q) {
   if (q.speech) return q.speech;
   const parts = [q.instruction];
-  if (q.ui === 'mission' && q.story) parts.push(q.story);
+  if (q.story) parts.push(q.story);
   return parts.filter(Boolean).map(speakMath).join('. ');
 }
 

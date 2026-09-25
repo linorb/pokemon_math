@@ -35,8 +35,8 @@ globalThis.document = {
 
 /* ---------- ייבוא כל המודולים ---------- */
 const mods = {};
-for (const name of ['util', 'topics', 'trainer', 'storage', 'progress', 'pokedex', 'pokemon', 'shop', 'art',
-  'questions', 'qui', 'ui', 'battle', 'map', 'lightning', 'main']) {
+for (const name of ['util', 'topics', 'trainer', 'storage', 'progress', 'pokedex', 'pokemon', 'shop', 'art', 'figures',
+  'qhelpers', 'questions-b', 'questions', 'qui', 'ui', 'battle', 'map', 'lightning', 'main']) {
   try {
     mods[name] = await import(`../js/${name}.js`);
     check(`נטען המודול ${name}.js`, true);
@@ -254,7 +254,10 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   p.setTopicEnabled('even_odd', true);
   check('פתיחה מחדש שומרת על סדר התכנית', p.enabledTopics().join() === 'numbers,even_odd,add_sub,missing,insight,word_add');
   p.setTopicEnabled('time', true);
-  check('נושא שעוד לא מוכן לא נפתח בפועל', !p.isTopicEnabled('time'));
+  check('ההורה פותח נושא חדש (שעון)', p.isTopicEnabled('time'));
+  const withTime = mods.questions.buildBattle(storage.getState(), { count: 5, topic: 'time' });
+  check('קרב במכון השעון', withTime.length === 5 && withTime.every((q) => q.topic === 'time'));
+  p.setTopicEnabled('time', false);
 
   check('אין תג בלי תרגול', p.awardBadgeIfEarned('add_sub') === false);
   storage.update((s) => { s.stats.byTopic.add_sub = { answered: 20, correct: 18, firstTry: 17, wrong: 3 }; });
@@ -353,6 +356,58 @@ const { SPECIES, STARTERS, STONES, RARITY, DEX_ORDER, TYPES, evolvesFrom, chainR
   const host = { ...fakeEl };
   createQuestionUI(sign, ctx).mount(host);
   check('סימני < ו-> מוצגים בבידוד LTR', host.innerHTML.includes('dir="ltr">&lt;<') && host.innerHTML.includes('blank-box'));
+
+  // תרגיל במאונך: מה שמקלידים מופיע בתיבות, ואחרי הפתרון מוצגת התשובה
+  const vq = GENERATORS.find((g) => g.type === 'vert_add').gen(1);
+  const vkeys = { ...ctx.keypad };
+  const vc = createQuestionUI(vq, { ...ctx, keypad: vkeys });
+  const vhost = { ...fakeEl };
+  vc.mount(vhost);
+  check('במאונך: הרכיב מאזין להקלדה', typeof vkeys.onChange === 'function');
+  vkeys.onChange('7');
+  check('במאונך: הספרה שהוקלדה מופיעה בתיבה', /v-box[^"]*">7</.test(vhost.innerHTML));
+  vc.lock();
+  const resDigits = String(vq.answer).split('').every((d) => vhost.innerHTML.includes(`v-solved">${d}<`));
+  check('במאונך: אחרי הפתרון מוצגת התוצאה', resDigits);
+  check('במאונך: בחיבור עם המרה מוצגת הנשיאה', vhost.innerHTML.includes('v-carry'));
+
+  // שיקוף: אחרי הפתרון מסומנות כל משבצות היעד
+  const mq = GENERATORS.find((g) => g.type === 'mirror_complete').gen(0);
+  const mc = createQuestionUI(mq, ctx);
+  const mhost = { ...fakeEl };
+  mc.mount(mhost);
+  check('שיקוף: בלי בחירה - לא הושלם', mc.submit().status === 'incomplete');
+  mc.lock();
+  check('שיקוף: הפתרון מצויר בירוק', (mhost.innerHTML.match(/fill="#5fd08b"/g) || []).length === mq.target.length);
+
+  // בחירה עם ציורים: שעון בלי הטקסט שמסגיר את התשובה
+  const cq = GENERATORS.find((g) => g.type === 'clock_pick').gen(1);
+  const chost = { ...fakeEl };
+  createQuestionUI(cq, ctx).mount(chost);
+  check('בחירת שעון: מצוירים שעונים בלי השעה בכתב', (chost.innerHTML.match(/clock-svg/g) || []).length === cq.options.length
+    && !cq.options.some((o) => chost.innerHTML.includes(`>${o.text}<`)));
+}
+
+/* ---------- ציורי השאלות ---------- */
+{
+  const { figureSvg, clockSvg, FIGURE_KINDS, SOLID_KINDS, gridSvg } = mods.figures;
+  const samples = {
+    pairs: { n: 5 }, clock: { h: 3, m: 30 }, solid: { name: 'cube' }, polygon: { sides: 5 }, ruler: { max: 12, start: 2, end: 9 },
+    balance: { left: ['🍎'], right: ['cube', 'cube'], tilt: 1 }, grid: { w: 4, h: 3, shapes: [{ cells: [[0, 0], [1, 0]], color: 'blue' }], mirror: 2 },
+    groups: { groups: 3, each: 4 }, array: { rows: 2, cols: 5 }, axis: { from: 0, step: 10, count: 11, labels: [0, 5, 10], mark: 3 },
+    chart: { labels: ['א', 'ב'], values: [3, 7], unit: 'x' }, fraction: { shapes: 1, parts: 4, filled: 1, shapeKind: 'pizza' },
+    multi: { items: [{ kind: 'clock', h: 1, m: 0 }, { kind: 'solid', name: 'cone' }] },
+  };
+  check('לכל סוג ציור יש דוגמה', FIGURE_KINDS.every((k) => samples[k]));
+  const bad = FIGURE_KINDS.filter((k) => !figureSvg({ kind: k, ...samples[k] }).includes('<svg'));
+  check('כל סוגי הציורים מצוירים', bad.length === 0, bad.join(','));
+  check('כל הגופים מצוירים', SOLID_KINDS.length === 6 && SOLID_KINDS.every((k) => figureSvg({ kind: 'solid', name: k }).includes('<line') || k === 'sphere'));
+  check('אין מזהי id בציורים', !FIGURE_KINDS.some((k) => /\sid="/.test(figureSvg({ kind: k, ...samples[k] }))));
+  // בשעה 3:00 המחוג הארוך על 12 והקצר על 3
+  const c3 = clockSvg(3, 0);
+  check('שעון 3:00: המחוג הארוך מצביע למעלה', c3.includes('x2="100" y2="28"'));
+  check('שעון 3:00: המחוג הקצר מצביע ימינה', c3.includes('x2="146" y2="100"'));
+  check('לוח משבצות לחיץ', gridSvg({ w: 2, h: 2, interactive: true }).split('data-cell=').length === 5);
 }
 
 /* ---------- הקראה ---------- */

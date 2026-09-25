@@ -5,64 +5,14 @@
 
 import { ri, pick, shuffle, weightedPick, fmt } from './util.js';
 import { TOPICS, REGION_ORDER } from './topics.js';
+import {
+  Q, P, opt, choiceOptions, PEOPLE, twoPeople, g, THINGS, ltrIsolate, MISSION, SHEKELS,
+} from './qhelpers.js';
+import { GENERATORS_B, PROGRAM_B } from './questions-b.js';
 
 export { TOPICS, REGION_ORDER };
 
 /* ============================ עזרים ============================ */
-
-let seq = 0;
-
-/** בניית אובייקט שאלה אחיד */
-function Q(o) {
-  seq += 1;
-  return {
-    qid: `q${seq}`,
-    ui: 'numeric',
-    unit: '',
-    instruction: 'פִּתְרוּ אֶת הַתַּרְגִּיל:',
-    expr: '',
-    story: '',
-    source: 'generated',
-    ...o,
-  };
-}
-
-/** אפשרות בחירה. ltr = סימן או תרגיל שחייבים להיות משמאל לימין */
-const opt = (text, correct = false, ltr = false) => ({ text: String(text), correct, ltr });
-
-/** אפשרויות בחירה מעורבבות: תשובה נכונה אחת + מסיחים ייחודיים */
-function choiceOptions(correct, wrongs, ltr = false) {
-  const seen = new Set([String(correct)]);
-  const list = [opt(correct, true, ltr)];
-  for (const w of wrongs) {
-    const t = String(w);
-    if (!seen.has(t)) { seen.add(t); list.push(opt(t, false, ltr)); }
-  }
-  return shuffle(list);
-}
-
-const PEOPLE = [
-  { n: 'נוֹעָה', g: 'f' }, { n: 'אִיתַי', g: 'm' }, { n: 'מַאיָה', g: 'f' }, { n: 'יוֹנָתָן', g: 'm' },
-  { n: 'תָּמָר', g: 'f' }, { n: 'אוּרִי', g: 'm' }, { n: 'שִׁירָה', g: 'f' }, { n: 'דָּנִיֵּאל', g: 'm' },
-  { n: 'רוֹנִי', g: 'f' }, { n: 'עוֹמֶר', g: 'm' },
-];
-
-function twoPeople() {
-  const [a, b] = shuffle(PEOPLE);
-  return [a, b];
-}
-
-/** בחירת מילה לפי מין: g(p, 'קָנָה', 'קָנְתָה') */
-const g = (p, m, f) => (p.g === 'f' ? f : m);
-
-const THINGS = ['קְלָפֵי פּוֹקִימוֹן', 'מַדְבֵּקוֹת', 'גֻּלּוֹת', 'סֻכָּרִיּוֹת', 'פּוֹקָדוֹרִים'];
-
-/**
- * בידוד משמאל לימין בתוך משפט עברי (LRI ... PDI).
- * בלי זה הדפדפן "הופך" את הסימנים < ו-> כשהם בתוך טקסט מימין לשמאל.
- */
-const ltrIsolate = (s) => `⁦${s}⁩`;
-
 const digitsOf = (n) => ({ h: Math.floor(n / 100), t: Math.floor(n / 10) % 10, u: n % 10 });
 const isEven = (n) => n % 2 === 0;
 
@@ -440,7 +390,7 @@ function genEoBuild(level = 0) {
 function genEoNext(level = 0) {
   const wantEven = Math.random() < 0.5;
   const after = Math.random() < 0.6;
-  const n = level === 0 ? ri(3, 40) : ri(41, level === 1 ? 199 : 999);
+  const n = level === 0 ? ri(3, 40) : ri(41, level === 1 ? 199 : 997);   // לא אחרי 997 - כדי לא לעבור את 1,000
   let ans = after ? n + 1 : n - 1;
   if (isEven(ans) !== wantEven) ans = after ? ans + 1 : ans - 1;
   const kind = wantEven ? 'הַזּוּגִי' : 'הָאִי-זוּגִי';
@@ -913,9 +863,6 @@ function genOrder3(level = 2) {
 
 /* ============================ ב3. שאלות חיבור וחיסור, כסף ועודף ============================ */
 
-const MISSION = 'מְשִׂימָה:';
-const SHEKELS = 'שְׁקָלִים';
-
 function genWordCompare(level = 0) {
   const max = level === 0 ? 20 : 90;
   const [p1, p2] = twoPeople();
@@ -1110,6 +1057,9 @@ export const GENERATORS = [
   { type: 'word_sum_known', topic: 'word_add', weight: 0.8, gen: genWordSumKnown },
   { type: 'money_pay', topic: 'word_add', weight: 1.1, gen: genMoneyPay },
   { type: 'money_change', topic: 'word_add', weight: 1, gen: genMoneyChange },
+
+  // שאר הנושאים (שלב ב') - בקובץ questions-b.js
+  ...GENERATORS_B,
 ];
 
 export function generateByType(type, level = 1) {
@@ -1119,10 +1069,6 @@ export function generateByType(type, level = 1) {
 
 /* ============================ דוגמאות מתוך תכנית הלימודים ============================ */
 // שאלות קבועות, בנוסח הדוגמאות שבתכנית משרד החינוך לכיתה ב'.
-
-function P(o) {
-  return Q({ source: 'program', ...o });
-}
 
 export const PROGRAM_QUESTIONS = [
   () => P({
@@ -1218,6 +1164,8 @@ export const PROGRAM_QUESTIONS = [
     story: 'הַסְּכוּם שֶׁל שְׁנֵי מִסְפָּרִים הוּא [[40]]. אֶחָד מֵהֶם הוּא [[22]]. מָהוּ הַמִּסְפָּר הַשֵּׁנִי?', answer: 18,
     hint: 'אֵיזֶה מִסְפָּר וְעוֹד 22 נוֹתֵן 40?', steps: ['40 - 22 = 18.', 'בְּדִיקָה: 22 + 18 = 40 ✔'],
   }),
+
+  ...PROGRAM_B,
 ];
 
 export function randomProgramQuestion(topics, stats = null) {

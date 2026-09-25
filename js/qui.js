@@ -3,7 +3,8 @@
 //   { status: 'correct' | 'wrong' | 'incomplete' | 'progress', message?, bonus? }
 
 import { fmt, esc, wrapMath } from './util.js';
-import { baseTenBlocks, moneySvg, pairsSvg, ballSvg } from './art.js';
+import { baseTenBlocks, moneySvg, ballSvg } from './art.js';
+import { figureSvg, fracShape, gridSvg } from './figures.js';
 
 /* ============================ עזרי ציור ============================ */
 
@@ -12,7 +13,9 @@ function exprBox(q) {
     .replace(/\?/g, '<span class="blank">?</span>')
     .replace(/▢/g, '<span class="blank-box"></span>');
   const dir = q.exprRtl ? 'rtl' : 'ltr';
-  const cls = q.exprRtl ? 'expr expr-big expr-rtl' : 'expr expr-big';
+  // תרגיל ארוך (למשל השוואה עם סוגריים) - בגופן קטן יותר, כדי שייכנס ברוחב של טלפון
+  const long = !q.exprRtl && q.expr.length > 17 ? ' expr-long' : '';
+  const cls = q.exprRtl ? 'expr expr-big expr-rtl' : `expr expr-big${long}`;
   return `<div class="${cls}" dir="${dir}">${body}</div>`;
 }
 
@@ -32,6 +35,13 @@ function instructionLine(q) {
   return q.instruction ? `<div class="q-text">${wrapMath(esc(q.instruction))}</div>` : '';
 }
 
+/** ציור לשאלה (שעון, גוף, סרגל, דיאגרמה...) */
+function figureHtml(q) {
+  const fig = q.figure || (q.chart ? { kind: 'chart', ...q.chart } : null);
+  if (!fig) return '';
+  return `<div class="figure fig-${fig.kind}">${figureSvg(fig)}</div>`;
+}
+
 /** תשובה מספרית מהמקלדת */
 function keypadVerdict(q, ctx) {
   const v = ctx.keypad.value();
@@ -46,8 +56,8 @@ function numericUI(q, ctx) {
     usesKeypad: true,
     usesSubmit: true,
     mount(host) {
-      host.innerHTML = instructionLine(q) + givenBox(q)
-        + (q.ui === 'mission' ? missionCard(q) : exprBox(q));
+      host.innerHTML = instructionLine(q) + givenBox(q) + figureHtml(q)
+        + (q.ui === 'mission' ? missionCard(q) : q.expr ? exprBox(q) : '');
     },
     submit() { return keypadVerdict(q, ctx); },
     lock() { ctx.keypad.setEnabled(false); },
@@ -76,28 +86,18 @@ function placeValueUI(q, ctx) {
 
 /* ============================ 3. שאלת בחירה ============================ */
 
-function figureHtml(q) {
-  if (!q.figure) return '';
-  if (q.figure.kind === 'pairs') return `<div class="figure">${pairsSvg(q.figure.n)}</div>`;
-  if (q.figure.kind === 'fraction') {
-    const f = q.figure;
-    const filled = Array.from({ length: f.shapes * f.parts }, (_, i) => i < f.filled);
-    const shapes = Array.from({ length: f.shapes }, (_, s) =>
-      `<div class="frac-shape-wrap">${fracShape(f.shapeKind, f.parts, filled, s * f.parts, false)}</div>`).join('');
-    return `<div class="frac-shapes">${shapes}</div>`;
-  }
-  return '';
-}
-
 function choiceUI(q, ctx) {
   let picked = -1;
   let host = null;
   let locked = false;
+  const withArt = q.options.some((o) => o.art);
   // אפשרויות קצרות (מספרים, סימנים, "זוגי") - כפתורים גדולים בשורה. ארוכות - אחת מתחת לשנייה.
-  const short = q.options.every((o) => o.text.length <= 14);
+  const short = withArt || q.options.every((o) => o.text.length <= 14);
 
   function optionLabel(o) {
-    return o.ltr ? `<span class="mathrun" dir="ltr">${esc(o.text)}</span>` : wrapMath(esc(o.text));
+    const text = o.ltr ? `<span class="mathrun" dir="ltr">${esc(o.text)}</span>` : wrapMath(esc(o.text));
+    if (!o.art) return text;
+    return `<span class="opt-art">${figureSvg(o.art)}</span>${o.artOnly ? '' : `<span class="opt-caption">${text}</span>`}`;
   }
 
   function draw() {
@@ -105,7 +105,7 @@ function choiceUI(q, ctx) {
       ${q.story ? missionCard(q) : ''}
       ${q.expr ? exprBox(q) : ''}
       ${figureHtml(q)}
-      <div class="${short ? 'choice-grid' : 'choice-list'} n${q.options.length}">${q.options.map((o, i) => `
+      <div class="${short ? 'choice-grid' : 'choice-list'} n${q.options.length} ${withArt ? 'with-art' : ''}">${q.options.map((o, i) => `
         <button class="choice-btn ${picked === i ? 'chosen' : ''}" type="button" data-o="${i}" ${locked ? 'disabled' : ''}>${optionLabel(o)}</button>`).join('')}
       </div>`;
     host.querySelectorAll('[data-o]').forEach((b) => {
@@ -274,42 +274,6 @@ function numberLineLocateUI(q, ctx) {
   };
 }
 
-/* ============================ ציור שברים (חצי ורבע) ============================ */
-
-let quiSeq = 0;
-const uid = () => `q${++quiSeq}`;
-
-/** צורה אחת מחולקת לחלקים. filled = מערך בוליאני */
-function fracShape(kind, parts, filled, offset, interactive) {
-  const id = uid();
-  const cells = [];
-  const fillOf = (i) => (filled[offset + i] ? 'var(--gold)' : 'rgba(255,255,255,.1)');
-
-  if (kind === 'pizza') {
-    for (let i = 0; i < parts; i++) {
-      const a0 = (-90 + (i * 360) / parts) * (Math.PI / 180);
-      const a1 = (-90 + ((i + 1) * 360) / parts) * (Math.PI / 180);
-      const x0 = 50 + 44 * Math.cos(a0); const y0 = 50 + 44 * Math.sin(a0);
-      const x1 = 50 + 44 * Math.cos(a1); const y1 = 50 + 44 * Math.sin(a1);
-      const large = 360 / parts > 180 ? 1 : 0;
-      const d = parts === 1
-        ? 'M50 6 A44 44 0 1 1 49.9 6 Z'
-        : `M50 50 L${x0.toFixed(2)} ${y0.toFixed(2)} A44 44 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
-      cells.push(`<path d="${d}" fill="${fillOf(i)}" stroke="#0d2340" stroke-width="2"
-        ${interactive ? `data-part="${offset + i}" class="frac-part"` : ''}/>`);
-    }
-    return `<svg class="frac-shape" viewBox="0 0 100 100" data-id="${id}">${cells.join('')}</svg>`;
-  }
-
-  const w = 96 / parts;
-  for (let i = 0; i < parts; i++) {
-    cells.push(`<rect x="${(2 + i * w).toFixed(2)}" y="18" width="${w.toFixed(2)}" height="64" rx="2"
-      fill="${fillOf(i)}" stroke="#0d2340" stroke-width="2"
-      ${interactive ? `data-part="${offset + i}" class="frac-part"` : ''}/>`);
-  }
-  return `<svg class="frac-shape" viewBox="0 0 100 100" data-id="${id}">${cells.join('')}</svg>`;
-}
-
 /* ============================ 7. צביעת חצי / רבע ============================ */
 
 function fracColorUI(q, ctx) {
@@ -349,54 +313,137 @@ function fracColorUI(q, ctx) {
   };
 }
 
-/* ============================ 8. דיאגרמת עמודות ============================ */
+/* ============================ 8. חיבור וחיסור במאונך ============================ */
 
-function chartUI(q, ctx) {
+const digitsOf = (n) => String(n).split('');
+
+/**
+ * תרגיל בעמודות (משמאל לימין). מה שמקלידים במקלדת מופיע בתיבות של שורת התוצאה, מימין.
+ * במצב "ספרה חסרה" (q.vertical.hide) - התיבה היחידה היא הספרה החסרה.
+ */
+function verticalUI(q, ctx) {
+  const { a, b, op, hide } = q.vertical;
+  const result = q.vertical.result ?? (op === '+' ? a + b : a - b);
+  const cols = Math.max(String(a).length, String(b).length, String(result).length);
   let host = null;
+  let locked = false;
+  let raw = '';
 
-  // הציר בצד ימין והעמודה הראשונה מימין - כמו בקריאה בעברית.
-  const COLORS = ['#59a9ff', '#ffd23f', '#ff7a6e', '#5fd08b', '#b98cff'];
-  const W = 360, H = 240, TOP = 18, BOTTOM = 200, LEFT = 10, RIGHT = 318;
+  /** מערך באורך cols, מיושר לימין */
+  const pad = (arr) => [...Array(Math.max(0, cols - arr.length)).fill(''), ...arr];
+
+  /** נשיאות בחיבור - לתצוגה אחרי הפתרון */
+  function carries() {
+    const out = Array(cols).fill('');
+    if (op !== '+') return out;
+    let c = 0;
+    for (let i = 0; i < cols; i++) {
+      const s = (Math.floor(a / 10 ** i) % 10) + (Math.floor(b / 10 ** i) % 10) + c;
+      c = s >= 10 ? 1 : 0;
+      if (c && i + 1 < cols) out[cols - 2 - i] = '1';
+    }
+    return out;
+  }
+
+  const cell = (d, extra = '') => `<span class="v-d ${extra}">${esc(d)}</span>`;
+
+  function rowOf(n, rowName) {
+    const ds = pad(digitsOf(n));
+    return ds.map((d, i) => {
+      const place = cols - 1 - i;
+      if (hide && hide.row === rowName && hide.place === place) {
+        const shown = locked ? String(q.answer) : raw.slice(-1);
+        return cell(shown || '?', `v-box ${shown ? '' : 'empty'} ${locked ? 'v-solved' : ''}`);
+      }
+      return cell(d);
+    }).join('');
+  }
+
+  function resultRow() {
+    if (hide) return pad(digitsOf(result)).map((d) => cell(d)).join('');
+    const typed = locked ? digitsOf(result) : raw ? raw.split('') : [];
+    const shown = pad(typed.slice(-cols));
+    return shown.map((d) => cell(d || '', `v-box ${d ? '' : 'empty'} ${locked ? 'v-solved' : ''}`)).join('');
+  }
 
   function draw() {
-    const { labels, values, unit } = q.chart;
-    const axisMax = Math.max(10, Math.ceil(Math.max(...values) / 10) * 10);
-    const step = axisMax <= 20 ? 1 : axisMax <= 60 ? 5 : 10;
-    const y = (v) => BOTTOM - (v / axisMax) * (BOTTOM - TOP);
-
-    let grid = '';
-    for (let v = 0; v <= axisMax; v += step) {
-      const major = v % (step * 2) === 0;
-      grid += `<line class="ch-grid ${major ? 'major' : ''}" x1="${LEFT}" x2="${RIGHT}" y1="${y(v)}" y2="${y(v)}"/>`;
-      if (major) grid += `<text class="ch-tick" x="${RIGHT + 8}" y="${y(v) + 5}">${fmt(v)}</text>`;
-    }
-
-    const n = values.length;
-    const slot = (RIGHT - LEFT) / n;
-    const bw = Math.min(56, slot * 0.62);
-    const bars = values.map((v, i) => {
-      const cx = RIGHT - slot * (i + 0.5);
-      return `
-        <rect x="${cx - bw / 2}" y="${y(v)}" width="${bw}" height="${BOTTOM - y(v)}" rx="5" fill="${COLORS[i % COLORS.length]}"/>
-        <text class="ch-label" x="${cx}" y="${BOTTOM + 22}">${esc(labels[i])}</text>`;
-    }).join('');
-
+    const carryRow = locked && !hide && op === '+' ? carries() : null;
     host.innerHTML = `${instructionLine(q)}
-      <div class="chart-unit">${esc(unit)}</div>
-      <svg class="bar-chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(`דיאגרמת עמודות: ${unit}`)}">
-        ${grid}
-        <line class="ch-axis" x1="${RIGHT}" x2="${RIGHT}" y1="${TOP - 6}" y2="${BOTTOM}"/>
-        <line class="ch-axis" x1="${LEFT}" x2="${RIGHT}" y1="${BOTTOM}" y2="${BOTTOM}"/>
-        ${bars}
-      </svg>`;
+      <div class="vert" dir="ltr" style="--cols:${cols}">
+        ${carryRow ? `<div class="v-row v-carry"><span class="v-op"></span>${carryRow.map((c) => cell(c)).join('')}</div>` : ''}
+        <div class="v-row"><span class="v-op"></span>${rowOf(a, 'a')}</div>
+        <div class="v-row"><span class="v-op">${op === '-' ? '−' : '+'}</span>${rowOf(b, 'b')}</div>
+        <div class="v-line"></div>
+        <div class="v-row v-res"><span class="v-op"></span>${resultRow()}</div>
+      </div>
+      <div class="nl-note">${hide ? 'כִּתְבוּ בַּמִּקְלֶדֶת אֶת הַסִּפְרָה הַחֲסֵרָה.' : 'כִּתְבוּ בַּמִּקְלֶדֶת אֶת הַתּוֹצָאָה - הִיא תּוֹפִיעַ בַּתֵּבוֹת.'}</div>`;
   }
 
   return {
     usesKeypad: true,
     usesSubmit: true,
-    mount(el) { host = el; draw(); },
+    mount(el) {
+      host = el;
+      ctx.keypad.onChange = (r) => { if (!locked) { raw = r; draw(); } };
+      draw();
+    },
     submit() { return keypadVerdict(q, ctx); },
-    lock() { ctx.keypad.setEnabled(false); },
+    lock() {
+      locked = true;
+      ctx.keypad.setEnabled(false);
+      draw();
+    },
+  };
+}
+
+/* ============================ 9. השלמת צורה בשיקוף ============================ */
+
+function mirrorGridUI(q, ctx) {
+  const { w, h, mirror, given } = q.grid;
+  const givenSet = new Set(given.map(([x, y]) => `${x},${y}`));
+  const leftGiven = given[0][0] < mirror;
+  const target = new Set(q.target);
+  let picked = new Set();
+  let host = null;
+  let locked = false;
+
+  const toCells = (set) => [...set].map((s) => s.split(',').map(Number));
+
+  function draw() {
+    const shapes = [{ cells: given, color: 'blue' }, { cells: toCells(picked), color: locked ? 'green' : 'yellow' }];
+    host.innerHTML = `${instructionLine(q)}
+      <div class="figure fig-mirror">${gridSvg({ w, h, shapes, mirror, interactive: !locked })}</div>
+      ${locked ? '' : '<div class="nl-note">לְחִיצָה נוֹסֶפֶת עַל מִשְׁבֶּצֶת מוֹחֶקֶת אוֹתָהּ.</div>'}`;
+    host.querySelectorAll('[data-cell]').forEach((el) => {
+      el.onclick = () => {
+        if (locked) return;
+        const k = el.dataset.cell;
+        const x = Number(k.split(',')[0]);
+        if (givenSet.has(k) || (leftGiven ? x < mirror : x >= mirror)) return;
+        if (picked.has(k)) picked.delete(k); else picked.add(k);
+        draw();
+      };
+    });
+  }
+
+  return {
+    usesKeypad: false,
+    usesSubmit: true,
+    mount(el) { host = el; draw(); },
+    submit() {
+      if (!picked.size) return { status: 'incomplete', message: 'לַחֲצוּ עַל מִשְׁבָּצוֹת כְּדֵי לִצְבֹּעַ אוֹתָן 🎨' };
+      const same = picked.size === target.size && [...picked].every((k) => target.has(k));
+      if (same) return { status: 'correct' };
+      const missing = [...target].filter((k) => !picked.has(k)).length;
+      const extra = [...picked].filter((k) => !target.has(k)).length;
+      if (!extra && missing) return { status: 'wrong', message: `כִּמְעַט! חֲסֵרוֹת עוֹד ${missing} מִשְׁבָּצוֹת.` };
+      return { status: 'wrong' };
+    },
+    lock() {
+      locked = true;
+      picked = new Set(target);
+      draw();
+    },
   };
 }
 
@@ -405,13 +452,15 @@ function chartUI(q, ctx) {
 const REGISTRY = {
   numeric: numericUI,
   mission: numericUI,
+  chart: numericUI,
   place_value: placeValueUI,
   choice: choiceUI,
   money: moneyUI,
   numberline_fill: numberLineFillUI,
   numberline_locate: numberLineLocateUI,
   frac_color: fracColorUI,
-  chart: chartUI,
+  vertical: verticalUI,
+  mirror_grid: mirrorGridUI,
 };
 
 export function createQuestionUI(q, ctx) {

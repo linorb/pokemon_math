@@ -255,6 +255,8 @@ const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'back']
 export const answerInput = {
   raw: '',
   enabled: true,
+  /** רכיב שאלה יכול להאזין להקלדה (למשל תרגיל במאונך שמציג את הספרות בתיבות) */
+  onChange: null,
 
   init() {
     const pad = $('#keypad');
@@ -297,9 +299,11 @@ export const answerInput = {
     d.innerHTML = this.raw === ''
       ? '<span class="placeholder">?</span>'
       : esc(fmt(Number(this.raw)));
+    if (this.onChange) this.onChange(this.raw);
   },
 
   reset(unit = '') {
+    this.onChange = null;
     this.raw = '';
     this.enabled = true;
     this.render();
